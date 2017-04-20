@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NodeJS Starter Application</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        var myurl = location.host;
+        var socket = io.connect(myurl);
+        console.log("in business");
+
+        function sendFeeds() {
+          socket.emit('feed', {feedParams: rssForm.feedsBox.value});
+        }
+
+        function sendKeywords() {
+          socket.emit('keyword', {keywordParams: rssForm.keywordsBox.value})
+        }
+
+        function begin() {
+          socket.emit('begin')
+        }
+
+    </script>
+
+    <table>
+        <tr>
+            <td style="width:30%;">
+                <img class="newappIcon" src="public/images/newapp-icon.png">
+            </td>
+            <td>
+                <h1 id="message">RSS Trawler</h1>
+                <p class='description'></p>.
+            </td>
+            <td>
+                <form id="rssForm">
+                    <fieldset>
+                        Feeds:<br>
+                        <input type="text" id="feedsBox"><input type="button" id="feedsButton" value="Add" onclick="sendFeeds()"><br>
+                        Keywords:<br>
+                        <input type="text" id="keywordsBox"><input type="button" id="keywordsButton" value="Add" onclick="sendKeywords()"><br>
+                        <input type="submit" id="startButton" value="Submit" onclick="begin()"><br>
+                    </fieldset>
+                </form>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
