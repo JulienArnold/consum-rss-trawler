@@ -18,6 +18,7 @@ A small web application that accepts keywords and RSS feeds (as URLs) and parses
 7. To view the results, navigate in your browser to `localhost:6001/results`.
 
 **Note:** Exactly one feed or keyword can be added at a time. This is still in development, and may contain unencountered bugs/issues.
+
 **Note:** this app is also currently case-sensitive with keywords; results may vary based on this.
   
 
