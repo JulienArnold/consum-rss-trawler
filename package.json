@@ -9,7 +9,6 @@
     "cfenv": "1.0.x",
     "express": "4.13.x",
     "feedparser": "^2.6.1",
-    "watson-developer-cloud": "^2.9.0",
     "async": "2.3.0",
     "feedparser": "2.2.0",
     "request": "2.81.0",

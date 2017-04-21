@@ -43,7 +43,7 @@ server.listen(appEnv.port, '0.0.0.0', function() {
 });
 
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/indexA.html');
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 io.on('connection', function(socket) {
