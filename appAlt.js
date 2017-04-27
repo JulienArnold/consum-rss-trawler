@@ -34,7 +34,7 @@ var feeds = ['https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest',
 'https://stackoverflow.com/feeds/tag?tagnames=node.js&sort=newest',
 'https://groups.google.com/forum/feed/nodejs/topics/rss.xml',
 'http://rss.slashdot.org/Slashdot/slashdotDevelopers'];
-var keywords = ['Java', 'Swift', 'nodejs', 'Node.js', 'memory', 'crashes'];
+var keywords = ['Java', 'Swift', 'node', 'Node.js', 'memory', 'crashes'];
 
 var feedIter = 0;
 var brickIter = 0;
@@ -108,6 +108,8 @@ function trawl() {
 
 
 app.get('/results', function(req, res) {
+    let transporter = nodemailer.createTransport(transport[, defaults])
+
     if (brick.length > 0) {
         res.write("<!DOCTYPE html>\n <html>\n<body>\n");
         res.write("KEYWORDS: " + "\n<br>")
@@ -127,9 +129,30 @@ app.get('/results', function(req, res) {
     } else {
         console.log("NO DATA TO SEND")
     }
-});
 
-//One of the godliest ways to remove duplicates ever
+      var transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: 'Julien.Arnold@uk.ibm.com',
+          pass: 'funtimesinruntimes'
+        }
+      })
+
+      var message = {
+        from: 'Julien.Arnold@uk.ibm.com',
+        to: 'Julien.Arnold@uk.ibm.com',
+        subject: 'AUTO: CONSUM-RSS-TRAWLER RESULTS',
+        text: brick.join("\n")
+      }
+
+      transporter.sendMail(message, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+        console.log('Message %s sent: %s', info.messageId, info.response);
+      });
+
+//Self explanatory
 function removeDuplicates(arr) {
     var i,
         len = arr.length,
