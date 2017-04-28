@@ -6,7 +6,7 @@ const async = require('async');
 const request = require('request');
 var FeedParser = require('feedparser');
 var fs = require('fs');
-var nodemailer = require('nodemailer');
+///var nodemailer = require('nodemailer');
 var io;
 
 function httpGet(url, callback) {
