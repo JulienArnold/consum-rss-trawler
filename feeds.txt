@@ -1,0 +1,4 @@
+https://stackoverflow.com/feeds/tag?tagnames=java&sort=newest
+https://stackoverflow.com/feeds/tag?tagnames=node.js&sort=newest
+https://groups.google.com/forum/feed/nodejs/topics/rss.xml
+http://rss.slashdot.org/Slashdot/slashdotDevelopers
