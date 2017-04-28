@@ -131,6 +131,7 @@ app.get('/results', function(req, res) {
     } else {
         console.log("NO DATA TO SEND")
     }
+  });
 
   } //End of trawl
 
