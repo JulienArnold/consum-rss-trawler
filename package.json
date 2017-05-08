@@ -12,7 +12,8 @@
     "async": "2.3.0",
     "feedparser": "2.2.0",
     "request": "2.81.0",
-    "socket.io": "1.7.3"
+    "socket.io": "1.7.3",
+    "glob": "7.1.1"
   },
   "repository": {},
   "engines": {

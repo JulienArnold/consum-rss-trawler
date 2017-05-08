@@ -1,9 +1,8 @@
 /*eslint-env node*/
 var express = require('express');
 const async = require('async');
-const request = require('request');
-var FeedParser = require('feedparser');
 var fs = require('fs');
+var trawler = require('./trawl.js');
 var io;
 
 function httpGet(url, callback) {
@@ -29,12 +28,9 @@ console.log(__dirname);
 // get the app environment from Cloud Foundry
 var appEnv = cfenv.getAppEnv();
 //container var just to store interesting info
-var brick = [];
 var feeds = [];
 var keywords = [];
 
-var feedIter = 0;
-var brickIter = 0;
 
 // start server on the specified port and binding host
 server.listen(appEnv.port, '0.0.0.0', function() {
@@ -68,72 +64,23 @@ function sanityStart(feeds, keywords) {
     console.log("SANITY!")
     if (feeds.length && keywords.length > 0) {
       console.log("entering foobar()")
-      foobar(feeds, keywords);
+      trawler.trawl(feeds, keywords);
     } else {
-      alert("You must specify at least 1 feed and 1 keyword.");
+      console.log("You must specify at least 1 feed and 1 keyword.");
     }
 }
 
-function foobar(feeds, keywords) {
-    var req = request(feeds[feedIter]);
-    var feedparser = FeedParser();
-
-    req.on('response', function(res) {
-        var stream = this; // `this` is `req`, which is a stream
-
-        if (res.statusCode !== 200) {
-            this.emit('error', new Error('Bad status code'));
-        } else {
-            stream.pipe(feedparser);
-        }
-    });
-
-    feedparser.on('error', function(error) {
-        // always handle errors
-    });
-
-    //When you GET data FROM A GIVEN FEED::::
-    feedparser.on('data', function(chunk) {
-        //Store description of a given article, converting JSON to string
-        //console.log("CURRENT FEED " + feeds[feedIter]);
-        var desc = JSON.stringify(chunk['description']);
-
-        //For every keyword we want to look for in A single given article: ((var i))
-        for (var i = 0; i < keywords.length; i++) {
-            //console.log("loop")
-            //Initialise var n, storing the value of whether/where the keyword is
-            var n = desc.indexOf(keywords[i])
-            if (n > -1) {
-                //The keyword is detected, we assign the current point in brick the link from the given text
-                console.log("KEYWORD " + keywords[i] + ": DETECTED" + "\n\n");
-                brick[brickIter] = chunk['link'];
-                brickIter++;
-                console.log("SAVED LINK " + brickIter + ": " + brick[brickIter - 1]);
-
-            }
-        }
-
-    });
-
-    feedparser.on('end', function() {
-        console.log("END")
-        if (feedIter < (feeds.length - 1)) {
-            brickIter = 0;
-            feedIter++;
-            console.log("next feed:: " + feedIter + " " + feeds[feedIter]);
-            foobar(feeds, keywords);
-        } else {
-            console.log("No more feeds left");
-            brick = removeDuplicates(brick);
-            console.log("Duplicates removed");
-            console.log("Go to /results");
-        }
-    });
-
-}
+/**
+function sanitise(data) {
+if(data == 'valid format') {
+  return true;
+} else {
+  'sanitise and'
+  return false;}
+}**/
 
 app.get('/results', function(req, res) {
-    if (brick.length > 0) {
+    if (trawler.getLinkList().length > 0) {
         res.write("<!DOCTYPE html>\n <html>\n<body>\n");
         res.write("KEYWORDS: " + "\n<br>")
         for (var j = 0; j < keywords.length; j++)
@@ -144,8 +91,11 @@ app.get('/results', function(req, res) {
             res.write(feeds[i] + "<br>")
         res.write("<br><br>")
         res.write("LINKS: " + "\n<br>")
-        for (var k = 0; k < brick.length; k++)
-            res.write("<a href=" + brick[k] + ">" + brick[k] + "</a>\n<br>\n");
+        trawler.getLinkList().forEach(function(value){
+          res.write("<a href=" + value + ">" + value + "</a>\n<br>\n");
+        })
+
+
         res.write("</body>\n</html>");
         res.end();
         console.log("DATA SENT TO WEBPAGE")
@@ -153,19 +103,3 @@ app.get('/results', function(req, res) {
         console.log("NO DATA TO SEND")
     }
 });
-
-//One of the godliest ways to remove duplicates ever
-function removeDuplicates(arr) {
-    var i,
-        len = arr.length,
-        out = [],
-        obj = {};
-
-    for (i = 0; i < len; i++) {
-        obj[arr[i]] = 0;
-    }
-    for (i in obj) {
-        out.push(i);
-    }
-    return out;
-}
