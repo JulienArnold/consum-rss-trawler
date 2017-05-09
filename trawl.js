@@ -4,19 +4,19 @@ var FeedParser = require('feedparser')
 
 var feedIter = 0;
 var linkListIter = 0;
-var linkList = [];
 
 exports.trawl = function(feeds, keywords) {
-    processLoop(feeds, keywords);
+  return processLoop(feeds, keywords);
 }
 
 //could export a trawlfile option
 
-exports.getLinkList = function() {
-  return linkList;
-}
+//exports.getLinkList = function() {
+//  return linkList;
+//}
 
 function processLoop(feeds, keywords) {
+    var linkList = [];
     var req = request(feeds[feedIter]);
     var feedparser = FeedParser();
 
@@ -44,7 +44,7 @@ function processLoop(feeds, keywords) {
         for (var i = 0; i < keywords.length; i++) {
             if (desc.indexOf(keywords[i]) > -1) {
                 //The keyword is detected, we assign the current point in linkList the link from the given text
-                console.log("KEYWORD " + keywords[i] + ": DETECTED" + "\n\n");
+                //console.log("KEYWORD " + keywords[i] + ": DETECTED" + "\n\n");
                 linkList[linkListIter] = chunk['link'];
                 linkListIter++;
                 //console.log("SAVED LINK " + linkListIter + ": " + linkList[linkListIter - 1]);
@@ -62,10 +62,10 @@ function processLoop(feeds, keywords) {
             console.log("next feed:: " + feedIter + " " + feeds[feedIter]);
             processLoop(feeds, keywords);
         } else {
-            console.log("No more feeds left");
             linkList = removeDuplicates(linkList);
-            console.log("Duplicates removed");
-            return linkList;
+            console.log("No more feeds left; duplicates removed");
+            console.log("tobes " + linkList)
+            //return linkList;
         }
     });
 
