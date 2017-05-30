@@ -1,0 +1,17 @@
+html {
+  background-color: #20214f;
+}
+
+body {
+       font: 12px Arial;
+       fill: white;
+   }
+
+h1, h3 {
+  color: #e7e9f7;
+}
+
+#rssForm {
+  margin: 0 auto;
+  text-align: center;
+}

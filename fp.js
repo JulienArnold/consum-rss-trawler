@@ -16,9 +16,11 @@ var keywords = ['Java', 'node', 'Node.js', 'memory', 'crashes'];
 var resultsDict = {}; // create an empty array
 var autoHtmlArray = [];
 var manualHtmlArray = [];
+//Because this uses express, you have to tell it to use the public directory
+//If that's where your files are
+app.use(express.static(__dirname + '/public'));
 
-
-server.listen(3000, function() {
+server.listen(3000, '0.0.0.0', function() {
     console.log('Example app listening on port 3000!')
 })
 

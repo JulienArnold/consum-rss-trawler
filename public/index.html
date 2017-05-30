@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 
+<meta charset="utf-8">
+
+<link rel="stylesheet" href="css/style.css"></link>
+
 <head>
-    <title>NodeJS Starter Application</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="public/stylesheets/style.css">
-    </head>
+    <title>Article Hunter</title>
+</head>
 
 <body>
     <script src="/socket.io/socket.io.js"></script>
@@ -34,18 +34,18 @@
     <table>
         <tr>
             <td style="width:30%;">
-                <img class="newappIcon" src="public/images/newapp-icon.png">
+                <img class="newappIcon" src="images/newapp-icon.png">
             </td>
             <td>
-                <h1 id="message">RSS Trawler</h1>
+                <h1 id="message">Article Hunter</h1>
                 <p class='description'></p>.
             </td>
             <td>
                 <form id="rssForm">
                     <fieldset>
-                        Feeds:<br>
+                        <h3>Feeds:</h3><br>
                         <input type="text" id="feedsBox"><input type="button" id="feedsButton" value="Add" onclick="sendFeeds()"><br>
-                        Keywords:<br>
+                        <h3>Additional Keywords:</h3><br>
                         <input type="text" id="keywordsBox"><input type="button" id="keywordsButton" value="Add" onclick="sendKeywords()"><br>
                         <input type="submit" id="startButton" value="Submit" onclick="begin()"><br>
                     </fieldset>
