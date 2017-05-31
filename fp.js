@@ -86,6 +86,18 @@ io.on('connection', function(socket) {
     })
 });
 
+function arrUnique(arr) {
+    var cleaned = [];
+    arr.forEach(function(itm) {
+        var unique = true;
+        cleaned.forEach(function(itm2) {
+            if (_.isEqual(itm, itm2)) unique = false;
+        });
+        if (unique)  cleaned.push(itm);
+    });
+    return cleaned;
+}
+
 function getFileContents() {
     //Only put 1 .feed and .keyword file pair under public/data/ . Multiple files will just break this
     var fileContents = [];
@@ -99,10 +111,29 @@ function getFileContents() {
     doEverythingElse(fileContents, 'auto');
 }
 
+function removeDupes(arr) {
+  var out = [];
+
+  for (var i = 0, l = arr.length; i < l; i++) {
+      var unique = true;
+      for (var j = 0, k = out.length; j < k; j++) {
+          if ((arr[i].postLink === out[j].postLink) && (arr[i].postTitle === out[j].postTitle)) {
+              unique = false;
+          }
+      }
+      if (unique) {
+          out.push(arr[i]);
+      }
+  }
+  return out;
+}
+
 function displayResults(resultsDictionary, inputType) {
     //After the dictionary comes in, we just want the value array of objects
     console.log("input type: " + inputType)
     var value = resultsDictionary.value;
+    value = removeDupes(value);
+    console.log("value after: " + value);
 
     if (inputType === 'auto') {
         //Fill auto array

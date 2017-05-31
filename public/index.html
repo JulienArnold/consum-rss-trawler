@@ -60,41 +60,52 @@
 
     </script>
 
-  <div class="headerDiv">
+<div class="headerDiv">
     <span class="titleHeader">ArticleHunter</span>
-  </div>
+    <span class="gitHeader">
+    <a href="https://github.com/JulienArnold/consum-rss-trawler">Go to Github</a>
+    </span>
+</div>
 
 <div class="row">
 
-  <div class="inputFormDiv">
+  <div id="inputFormDiv" class="col-1">
     <form id="rssForm">
-      <fieldset>
-        <h3>Feeds:</h3><br>
+        <h2>Feeds</h2><br>
         <input type="text" id="feedsBox"><input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList()"><br>
-        <h3>Additional Keywords:</h3><br>
+        <h2>Additional Keywords</h2><br>
         <input type="text" id="keywordsBox"><input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList()"><br>
         <input type="submit" id="startButton" value="Submit" onclick="begin()"><br>
-      </fieldset>
     </form>
   </div>
 
-  <div class="scrollDiv">
-    <h2>Active feeds:</h2>
-    <nav id="feedsScroll">
+  <div id="scrollDiv" class="col-2">
+    <h2>Active Feeds</h2>
+    <nav id="feedsScroll" class="scroll">
       <ul id="feedsScrollList">
       </ul>
     </nav>
   </div>
 
+    <div id="scrollDiv2" class="col-2">
+      <h2>Active Keywords</h2>
+      <nav id="keywordsScroll" class="scroll">
+        <ul id="keywordsScrollList">
+        </ul>
+      </nav>
+    </div>
+
 </div>
 
 <div class="row">
-  <div class="scrollDiv2">
-    <h2>Active keywords:</h2>
-    <nav id="keywordsScroll">
-      <ul id="keywordsScrollList">
-      </ul>
-    </nav>
+  <div id="redirectDiv" class="col-3">
+    <h2>Results (Auto)</h2>
+    <a class="resultsLink" href="http://localhost:3000/results/auto">Automated Results</a>
+  </div>
+
+  <div id="redirectDiv2" class="col-3">
+    <h2>Results</h2>
+    <a class="resultsLink" href="http://localhost:3000/results/manual">Manual Results</a>
   </div>
 </div>
 
