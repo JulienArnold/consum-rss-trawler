@@ -16,6 +16,8 @@ var keywords = ['Java', 'node', 'Node.js', 'memory', 'crashes'];
 var resultsDict = {}; // create an empty array
 var autoHtmlArray = [];
 var manualHtmlArray = [];
+var manualFeeds = [];
+var manualKeywords = [];
 //Because this uses express, you have to tell it to use the public directory
 //If that's where your files are
 app.use(express.static(__dirname + '/public'));
@@ -42,9 +44,29 @@ app.get('/results/manual', function(req, res) {
     res.send();
 })
 
+//Try duplicating for feeds - will need to be done slightly different
+//As manualFeeds is defined within io.on('connection')
+app.get('/getkeywords', function(req, res) {
+  console.log("request received")
+  var string = manualKeywords[manualKeywords.length - 1];
+  console.log("string '" + string + "' chosen");
+  res.writeHead(200, {"Content-Type": "text/plain"});
+  res.end(string);
+  console.log("string sent");
+})
+
+app.get('/getfeeds', function(req, res) {
+  console.log("request received")
+  var string = manualFeeds[manualFeeds.length - 1];
+  console.log("string '" + string + "' chosen");
+  res.writeHead(200, {"Content-Type": "text/plain"});
+  res.end(string);
+  console.log("string sent");
+})
+
 io.on('connection', function(socket) {
     console.log("Connection made");
-    var manualFeeds = [];
+    manualFeeds = [];
     manualHtmlArray = [];
 
     socket.on('feed', function(data) {
@@ -55,8 +77,8 @@ io.on('connection', function(socket) {
     socket.on('keyword', function(data) {
         console.log("SUCCESS");
         console.log(data.keywordParams);
-        keywords.push(data.keywordParams);
-        console.log("Keywords: " + keywords);
+        manualKeywords.push(data.keywordParams);
+        console.log("Keywords: " + manualKeywords);
     })
     socket.on('begin', function() {
       console.log("doing everything else")
@@ -117,6 +139,13 @@ function doEverythingElse(fileContents, inputType) {
     var savedLinks = [];
     var numberOfFeeds = fileContents.length;
     console.log("number of feeds at loop: " + numberOfFeeds)
+    var keyArray = [];
+    //This differentiates whether to use manually input keywords, or a default set for auto
+    if(inputType === 'manual') {
+      keyArray = manualKeywords;
+    } else {
+      keyArray = keywords;
+    }
 
     for (var i = 0; i < fileContents.length; i++) {
         console.log("I " + i)
@@ -167,7 +196,7 @@ function doEverythingElse(fileContents, inputType) {
             //console.log(JSON.stringify(chunk))
             //Store description of a given article, converting JSON to string
             var desc = JSON.stringify(chunk['description']);
-            for (var i = 0; i < keywords.length; i++) {
+            for (var i = 0; i < keyArray.length; i++) {
                 if (desc.indexOf(keywords[i]) > -1) {
                     savedLinks.push({
                         postLink: chunk['link'],

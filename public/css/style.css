@@ -1,17 +1,44 @@
 html {
-  background-color: #20214f;
+  background-color: #f5f7fa;
 }
 
 body {
-       font: 12px Arial;
+       font-size: 12px;
+       font-family: sans-serif, Arial;
        fill: white;
+       width: 100%;
+       height: 100%;
+       margin: 0 auto;
    }
 
-h1, h3 {
+.inputFormDiv {
+  width: 50%;
+  height: 100%;
+  float:left;
+  text-align: center;
+    margin: 0 auto;
+}
+
+.titleHeader {
+  float: left;
+  font-size: 20px;
+  width: 100%;
+  background-color: #1D3649;
   color: #e7e9f7;
 }
 
-#rssForm {
-  margin: 0 auto;
-  text-align: center;
+nav ul{height:200px; width:30%;}
+nav ul{overflow:hidden; overflow-y:scroll;}
+
+.scrollDiv,
+.scrollDiv2 {
+  width: 50%;
+  height: 100%;
+  float:right;
+  border: 1px solid #aabbd4;
+}
+
+.row {
+  margin-left: -15px;
+  margin-right: -15px;
 }

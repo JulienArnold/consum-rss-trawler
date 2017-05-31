@@ -6,12 +6,12 @@
 <link rel="stylesheet" href="css/style.css"></link>
 
 <head>
-    <title>Article Hunter</title>
+    <title>ArticleHunter</title>
 </head>
 
 <body>
     <script src="/socket.io/socket.io.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script>
         var myurl = location.host;
         var socket = io.connect(myurl);
@@ -29,32 +29,75 @@
           socket.emit('begin')
         }
 
+        function appendKeywordsList() {
+          xmlhttp = new XMLHttpRequest();
+          xmlhttp.open("GET", "http://localhost:3000/getkeywords", true);
+          xmlhttp.onreadystatechange=function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+              var ul = document.getElementById("keywordsScrollList");
+              var li = document.createElement("li");
+              li.appendChild(document.createTextNode(xmlhttp.responseText));
+              ul.appendChild(li);
+            }
+          }
+          xmlhttp.send();
+        }
+
+        function appendFeedsList() {
+          xmlhttp = new XMLHttpRequest();
+          xmlhttp.open("GET", "http://localhost:3000/getfeeds", true);
+          xmlhttp.onreadystatechange=function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+              var ul = document.getElementById("feedsScrollList");
+              var li = document.createElement("li");
+              console.log(xmlhttp.responseText);
+              li.appendChild(document.createTextNode(xmlhttp.responseText));
+              ul.appendChild(li);
+            }
+          }
+          xmlhttp.send();
+        }
+
     </script>
 
-    <table>
-        <tr>
-            <td style="width:30%;">
-                <img class="newappIcon" src="images/newapp-icon.png">
-            </td>
-            <td>
-                <h1 id="message">Article Hunter</h1>
-                <p class='description'></p>.
-            </td>
-            <td>
-                <form id="rssForm">
-                    <fieldset>
-                        <h3>Feeds:</h3><br>
-                        <input type="text" id="feedsBox"><input type="button" id="feedsButton" value="Add" onclick="sendFeeds()"><br>
-                        <h3>Additional Keywords:</h3><br>
-                        <input type="text" id="keywordsBox"><input type="button" id="keywordsButton" value="Add" onclick="sendKeywords()"><br>
-                        <input type="submit" id="startButton" value="Submit" onclick="begin()"><br>
-                    </fieldset>
-                </form>
-            </td>
-        </tr>
-        <tr id="resLinkTable">
-        </tr>
-    </table>
+  <div class="headerDiv">
+    <span class="titleHeader">ArticleHunter</span>
+  </div>
+
+<div class="row">
+
+  <div class="inputFormDiv">
+    <form id="rssForm">
+      <fieldset>
+        <h3>Feeds:</h3><br>
+        <input type="text" id="feedsBox"><input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList()"><br>
+        <h3>Additional Keywords:</h3><br>
+        <input type="text" id="keywordsBox"><input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList()"><br>
+        <input type="submit" id="startButton" value="Submit" onclick="begin()"><br>
+      </fieldset>
+    </form>
+  </div>
+
+  <div class="scrollDiv">
+    <h2>Active feeds:</h2>
+    <nav id="feedsScroll">
+      <ul id="feedsScrollList">
+      </ul>
+    </nav>
+  </div>
+
+</div>
+
+<div class="row">
+  <div class="scrollDiv2">
+    <h2>Active keywords:</h2>
+    <nav id="keywordsScroll">
+      <ul id="keywordsScrollList">
+      </ul>
+    </nav>
+  </div>
+</div>
+
 </body>
 
 </html>
