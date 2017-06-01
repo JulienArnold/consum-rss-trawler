@@ -31,43 +31,57 @@ app.get('/', function(req, res) {
 });
 
 app.get('/results/auto', function(req, res) {
-    for (let i = 0; i < autoHtmlArray.length; i++) {
-        res.write(autoHtmlArray[i]);
+    if (autoHtmlArray.length > 0) {
+        for (let i = 0; i < autoHtmlArray.length; i++) {
+            res.write(autoHtmlArray[i]);
+        }
+        res.send();
+    } else {
+        res.write("No results found!");
+        res.send();
     }
-    res.send();
+
 })
 
 app.get('/results/manual', function(req, res) {
-    for (let i = 0; i < manualHtmlArray.length; i++) {
-        res.write(manualHtmlArray[i]);
+    if (manualHtmlArray.length > 0) {
+        for (let i = 0; i < manualHtmlArray.length; i++) {
+            res.write(manualHtmlArray[i]);
+        }
+        res.send();
+    } else {
+        res.write("No results found!");
+        res.send();
     }
-    res.send();
 })
 
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')
 app.get('/getkeywords', function(req, res) {
-  console.log("request received")
-  var string = manualKeywords[manualKeywords.length - 1];
-  console.log("string '" + string + "' chosen");
-  res.writeHead(200, {"Content-Type": "text/plain"});
-  res.end(string);
-  console.log("string sent");
+    console.log("request received")
+    var string = manualKeywords[manualKeywords.length - 1];
+    console.log("string '" + string + "' chosen");
+    res.writeHead(200, {
+        "Content-Type": "text/plain"
+    });
+    res.end(string);
+    console.log("string sent");
 })
 
 app.get('/getfeeds', function(req, res) {
-  console.log("request received")
-  var string = manualFeeds[manualFeeds.length - 1];
-  console.log("string '" + string + "' chosen");
-  res.writeHead(200, {"Content-Type": "text/plain"});
-  res.end(string);
-  console.log("string sent");
+    console.log("request received")
+    var string = manualFeeds[manualFeeds.length - 1];
+    console.log("string '" + string + "' chosen");
+    res.writeHead(200, {
+        "Content-Type": "text/plain"
+    });
+    res.end(string);
+    console.log("string sent");
 })
 
 io.on('connection', function(socket) {
     console.log("Connection made");
     manualFeeds = [];
-    manualHtmlArray = [];
 
     socket.on('feed', function(data) {
         console.log("SUCCESS");
@@ -81,7 +95,7 @@ io.on('connection', function(socket) {
         console.log("Keywords: " + manualKeywords);
     })
     socket.on('begin', function() {
-      console.log("doing everything else")
+        console.log("doing everything else")
         doEverythingElse(manualFeeds, 'manual');
     })
 });
@@ -93,7 +107,7 @@ function arrUnique(arr) {
         cleaned.forEach(function(itm2) {
             if (_.isEqual(itm, itm2)) unique = false;
         });
-        if (unique)  cleaned.push(itm);
+        if (unique) cleaned.push(itm);
     });
     return cleaned;
 }
@@ -112,20 +126,20 @@ function getFileContents() {
 }
 
 function removeDupes(arr) {
-  var out = [];
+    var out = [];
 
-  for (var i = 0, l = arr.length; i < l; i++) {
-      var unique = true;
-      for (var j = 0, k = out.length; j < k; j++) {
-          if ((arr[i].postLink === out[j].postLink) && (arr[i].postTitle === out[j].postTitle)) {
-              unique = false;
-          }
-      }
-      if (unique) {
-          out.push(arr[i]);
-      }
-  }
-  return out;
+    for (var i = 0, l = arr.length; i < l; i++) {
+        var unique = true;
+        for (var j = 0, k = out.length; j < k; j++) {
+            if ((arr[i].postLink === out[j].postLink) && (arr[i].postTitle === out[j].postTitle)) {
+                unique = false;
+            }
+        }
+        if (unique) {
+            out.push(arr[i]);
+        }
+    }
+    return out;
 }
 
 function displayResults(resultsDictionary, inputType) {
@@ -148,15 +162,15 @@ function displayResults(resultsDictionary, inputType) {
         for (let i = 0; i < value.length; i++) {
             manualHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a>\n<br>\n");
         }
-        //Clear last element for clean input
-        console.log("manual array after pop: " + manualHtmlArray);
+        console.log("Manual html array: ")
+        console.log(manualHtmlArray);
     } else {
         console.log('INPUT TYPE must be MANUAL or AUTO: ' + inputType);
     }
     //By the end of this if statement we should have, after being called once for auto and once for manual input,
     //Two arrays. A manualHtml array which'll get passed into the manual results page
 
-    //Duplicate for manual
+
 
 }
 
@@ -172,10 +186,10 @@ function doEverythingElse(fileContents, inputType) {
     console.log("number of feeds at loop: " + numberOfFeeds)
     var keyArray = [];
     //This differentiates whether to use manually input keywords, or a default set for auto
-    if(inputType === 'manual') {
-      keyArray = manualKeywords;
+    if (inputType === 'manual') {
+        keyArray = manualKeywords;
     } else {
-      keyArray = keywords;
+        keyArray = keywords;
     }
 
     for (var i = 0; i < fileContents.length; i++) {
@@ -217,7 +231,7 @@ function doEverythingElse(fileContents, inputType) {
                     key: currentValue.toString(), //String: URL of current feed
                     value: savedLinks //Array: Array: String URLs, String titles
                 };
-                console.log("CURRENT VALUE " + currentValue.toString() + " AND SAVED LINKS: " + savedLinks.length);
+                console.log("CURRENT VALUE " + currentValue.toString() + " & SAVED LINKS: " + savedLinks.length);
                 displayResults(resultsDict, inputType);
             }
         });
@@ -227,12 +241,14 @@ function doEverythingElse(fileContents, inputType) {
             //console.log(JSON.stringify(chunk))
             //Store description of a given article, converting JSON to string
             var desc = JSON.stringify(chunk['description']);
-            for (var i = 0; i < keyArray.length; i++) {
-                if (desc.indexOf(keywords[i]) > -1) {
+            for (let i = 0; i < keyArray.length; i++) {
+                if (desc.indexOf(keyArray[i]) > -1) {
+                  console.log("KEYWORD " + keyArray[i]);
                     savedLinks.push({
                         postLink: chunk['link'],
                         postTitle: chunk['title']
                     });
+                    console.log("SAVED LINK title: " + chunk['title']);
                 }
             }
             //console.log("length after " + savedLinks.length);

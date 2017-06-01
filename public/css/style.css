@@ -34,7 +34,7 @@ a:hover {
   color: #d9dcf2;
 }
 
-#inputFormDiv {
+.rssForm {
   width: 50%;
   height: 100%;
   text-align: center;
@@ -43,7 +43,7 @@ a:hover {
 
 nav ul{
   height:200px;
-  width:85%;
+  width:90%;
   overflow-y:scroll;
 }
 
@@ -72,10 +72,9 @@ h2 {
   padding-top: 0px;
   padding-bottom: 0px;
   border: 1px solid #eef1f6;
-  float:left;
+  text-align: center;
 }
 
-#redirectDiv,
-#redirectDiv2 {
+#redirectDiv {
   float: right;
 }
