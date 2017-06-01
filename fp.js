@@ -2,7 +2,6 @@ var io;
 //Required modules
 var FeedParser = require('feedparser');
 var request = require('request'); // for fetching the feed
-var glob = require('glob').Glob; //Performs an asynchronous partial string match search on a directory
 var fs = require('fs');
 var express = require('express');
 //Express server

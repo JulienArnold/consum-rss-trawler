@@ -31,7 +31,7 @@
 
         function appendKeywordsList() {
           xmlhttp = new XMLHttpRequest();
-          xmlhttp.open("GET", "http://localhost:3000/getkeywords", true);
+          xmlhttp.open("GET", window.location + "getkeywords", true);
           xmlhttp.onreadystatechange=function() {
             if (xmlhttp.readyState==4 && xmlhttp.status==200) {
               var ul = document.getElementById("keywordsScrollList");
@@ -45,7 +45,7 @@
 
         function appendFeedsList() {
           xmlhttp = new XMLHttpRequest();
-          xmlhttp.open("GET", "http://localhost:3000/getfeeds", true);
+          xmlhttp.open("GET", window.location + "getfeeds", true);
           xmlhttp.onreadystatechange=function() {
             if (xmlhttp.readyState==4 && xmlhttp.status==200) {
               var ul = document.getElementById("feedsScrollList");
@@ -57,6 +57,8 @@
           }
           xmlhttp.send();
         }
+
+        socket.on('')
 
     </script>
 
