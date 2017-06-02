@@ -97,6 +97,17 @@ io.on('connection', function(socket) {
         console.log("doing everything else")
         doEverythingElse(manualFeeds, 'manual');
     })
+    socket.on('removeKeyword', function() {
+      if(manualKeywords.length > 0) {
+        manualKeywords.pop();
+      }
+    })
+
+    socket.on('removeFeed', function() {
+      if(manualFeeds.length > 0) {
+        manualFeeds.pop();
+      }
+    })
 });
 
 function arrUnique(arr) {
@@ -143,7 +154,8 @@ function removeDupes(arr) {
 
 function displayResults(resultsDictionary, inputType) {
     //After the dictionary comes in, we just want the value array of objects
-    console.log("input type: " + inputType)
+    console.log("input type: " + inputType);
+    io.emit('message', inputType);
     var value = resultsDictionary.value;
     value = removeDupes(value);
     console.log("value after: " + value);
@@ -168,8 +180,6 @@ function displayResults(resultsDictionary, inputType) {
     }
     //By the end of this if statement we should have, after being called once for auto and once for manual input,
     //Two arrays. A manualHtml array which'll get passed into the manual results page
-
-
 
 }
 
@@ -222,6 +232,7 @@ function doEverythingElse(fileContents, inputType) {
             console.log("end called")
             numberOfFeeds--;
             console.log("number of feeds after decrement " + numberOfFeeds);
+            io.emit('message', "number of feeds after decrement " + numberOfFeeds + "\n");
             if (numberOfFeeds === 0) {
                 //let key = currentValue.toString(); //String: URL of current feed
                 //let value = savedLinks; //Array: Array: String URLs, String titles
@@ -231,6 +242,7 @@ function doEverythingElse(fileContents, inputType) {
                     value: savedLinks //Array: Array: String URLs, String titles
                 };
                 console.log("CURRENT VALUE " + currentValue.toString() + " & SAVED LINKS: " + savedLinks.length);
+                io.emit('message', "CURRENT VALUE " + currentValue.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
                 displayResults(resultsDict, inputType);
             }
         });
@@ -248,6 +260,7 @@ function doEverythingElse(fileContents, inputType) {
                         postTitle: chunk['title']
                     });
                     console.log("SAVED LINK title: " + chunk['title']);
+                    io.emit('message', "SAVED LINK title: " + chunk['title'] + "\n")
                 }
             }
             //console.log("length after " + savedLinks.length);
