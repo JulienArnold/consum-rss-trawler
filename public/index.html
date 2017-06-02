@@ -58,6 +58,16 @@
           xmlhttp.send();
         }
 
+        function removeFeedsElement() {
+          var ul = document.getElementById("feedsScrollList");
+          ul.removeChild();
+        }
+
+        function removeKeywordsElement() {
+          var ul = document.getElementById("keywordsScrollList");
+          ul.removeChild();
+        }
+
         socket.on('message', function(data) {
           var nav = document.getElementById("consoleScroll");
           var label = document.createElement("label");
@@ -90,7 +100,7 @@
         <h1>Feeds</h1><br>
         <input type="text" id="feedsBox">
         <input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList()">
-        <input type="button" id="feedsRemove" value="Remove" onclick="removeFeed();"><br><br><br>
+        <input type="button" id="feedsRemove" value="Remove" onclick="removeFeed(); removeFeedsElement();"><br><br><br>
         <div class="rssForm">
           <nav id="feedsScroll">
             <ul id="feedsScrollList">
@@ -108,7 +118,7 @@
     <h1>Additional Keywords</h1><br>
     <input type="text" id="keywordsBox">
     <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList()">
-    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword();"><br><br><br>
+    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();"><br><br><br>
     <div class="rssForm">
     <nav id="keywordsScroll">
       <ul id="keywordsScrollList">

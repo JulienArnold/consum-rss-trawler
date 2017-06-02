@@ -4,6 +4,7 @@ var FeedParser = require('feedparser');
 var request = require('request'); // for fetching the feed
 var fs = require('fs');
 var express = require('express');
+var scheduler = require('node-schedule');
 //Express server
 var app = express()
 var server = require('http').Server(app);
@@ -203,9 +204,9 @@ function doEverythingElse(fileContents, inputType) {
 
     for (var i = 0; i < fileContents.length; i++) {
         console.log("I " + i)
-        let currentValue = fileContents[i];
-        console.log("CURRENT VALUE: " + currentValue);
-        var req = request(currentValue);
+        let currentFeed = fileContents[i];
+        console.log("CURRENT FEED: " + currentFeed);
+        var req = request(currentFeed);
 
 
         req.on('error', function(error) {
@@ -234,15 +235,15 @@ function doEverythingElse(fileContents, inputType) {
             console.log("number of feeds after decrement " + numberOfFeeds);
             io.emit('message', "number of feeds after decrement " + numberOfFeeds + "\n");
             if (numberOfFeeds === 0) {
-                //let key = currentValue.toString(); //String: URL of current feed
+                //let key = currentFeed.toString(); //String: URL of current feed
                 //let value = savedLinks; //Array: Array: String URLs, String titles
                 //resultsDict[key] = value;
                 resultsDict = {
-                    key: currentValue.toString(), //String: URL of current feed
+                    key: currentFeed.toString(), //String: URL of current feed
                     value: savedLinks //Array: Array: String URLs, String titles
                 };
-                console.log("CURRENT VALUE " + currentValue.toString() + " & SAVED LINKS: " + savedLinks.length);
-                io.emit('message', "CURRENT VALUE " + currentValue.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
+                console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
+                io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
                 displayResults(resultsDict, inputType);
             }
         });
@@ -270,5 +271,9 @@ function doEverythingElse(fileContents, inputType) {
     console.log("DISPLAYING RESULTS");
 } //End of doing everything else
 
-//After defining every function, we run the automatic chain of functions, forcing partially synchronous behaviour
+//Run getFileContents() ONCE (on startup) just so we have a list of results
 getFileContents();
+//run getFileContents on a cron-like schedule of 9am
+scheduler.scheduleJob('* 9 * * *', function() {
+  getFileContents();
+})
