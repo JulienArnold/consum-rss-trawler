@@ -153,7 +153,7 @@ function removeDupes(arr) {
     return out;
 }
 
-function displayResults(resultsDictionary, inputType) {
+function formatResults(resultsDictionary, inputType, detectedKeywords) {
     //After the dictionary comes in, we just want the value array of objects
     console.log("input type: " + inputType);
     io.emit('message', inputType);
@@ -165,14 +165,14 @@ function displayResults(resultsDictionary, inputType) {
         //Fill auto array
 
         for (let i = 0; i < value.length; i++) {
-            autoHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a>\n<br>\n");
+            autoHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords'] + "\n<br>\n");
         }
 
     } else if (inputType === 'manual') {
         //Fill manual array
 
         for (let i = 0; i < value.length; i++) {
-            manualHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a>\n<br>\n");
+            manualHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords'] + "\n<br>\n");
         }
         console.log("Manual html array: ")
         console.log(manualHtmlArray);
@@ -195,6 +195,7 @@ function doEverythingElse(fileContents, inputType) {
     var numberOfFeeds = fileContents.length;
     console.log("number of feeds at loop: " + numberOfFeeds)
     var keyArray = [];
+    var detectedKeywords = [];
     //This differentiates whether to use manually input keywords, or a default set for auto
     if (inputType === 'manual') {
         keyArray = manualKeywords;
@@ -244,25 +245,33 @@ function doEverythingElse(fileContents, inputType) {
                 };
                 console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
                 io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
-                displayResults(resultsDict, inputType);
+                formatResults(resultsDict, inputType);
             }
         });
 
         feedparser.on('data', function(chunk) {
+          //Whenever we're looking at a new link, reset detectedKeywords to []
+          detectedKeywords = [];
             //console.log("length before " + savedLinks.length);
             //console.log(JSON.stringify(chunk))
             //Store description of a given article, converting JSON to string
             var desc = JSON.stringify(chunk['description']);
+            //for every keyword we have
             for (let i = 0; i < keyArray.length; i++) {
+              //If the keyword is detected in the description:
                 if (desc.indexOf(keyArray[i]) > -1) {
+                  detectedKeywords.push(keyArray[i]);
                   console.log("KEYWORD " + keyArray[i]);
-                    savedLinks.push({
-                        postLink: chunk['link'],
-                        postTitle: chunk['title']
-                    });
                     console.log("SAVED LINK title: " + chunk['title']);
                     io.emit('message', "SAVED LINK title: " + chunk['title'] + "\n")
                 }
+            }
+            if(detectedKeywords.length > 0) {
+                savedLinks.push({
+                    postLink: chunk['link'],
+                    postTitle: chunk['title'],
+                    postKeywords: detectedKeywords
+                });
             }
             //console.log("length after " + savedLinks.length);
         });
