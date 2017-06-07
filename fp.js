@@ -31,7 +31,21 @@ app.get('/', function(req, res) {
 });
 
 app.get('/results/auto', function(req, res) {
-    if (autoHtmlArray.length > 0) {
+  console.log(autoHtmlArray);
+  console.log(autoHtmlArray.length);
+  //For every keyword in keywords, write the keyword as a h1/h2 to the page
+  //For the length of autoHtmlArray,
+  //If indexOf autoHtmlArray[i] contains the keyword, write it under this keyword h1
+  for(let i = 0; i < keywords.length; i++) {
+    res.write("<h2>" + keywords[i] + ":</h2><br>")
+    for(let j = 0; j < autoHtmlArray.length; j++) {
+      if(autoHtmlArray[j].indexOf(keywords[i]) > -1) {
+        res.write(autoHtmlArray[j] + "<br>");
+      }
+    }
+  }
+
+/**    if (autoHtmlArray.length > 0) {
         for (let i = 0; i < autoHtmlArray.length; i++) {
             res.write(autoHtmlArray[i]);
         }
@@ -39,8 +53,8 @@ app.get('/results/auto', function(req, res) {
     } else {
         res.write("No results found!");
         res.send();
-    }
-
+    } **/
+    res.send();
 })
 
 app.get('/results/manual', function(req, res) {
@@ -53,7 +67,8 @@ app.get('/results/manual', function(req, res) {
         res.write("No results found!");
         res.send();
     }
-})
+    io.send("array",manualHtmlArray)
+  })
 
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')
@@ -81,7 +96,6 @@ app.get('/getfeeds', function(req, res) {
 
 io.on('connection', function(socket) {
     console.log("Connection made");
-    manualFeeds = [];
 
     socket.on('feed', function(data) {
         console.log("SUCCESS");
@@ -96,7 +110,9 @@ io.on('connection', function(socket) {
     })
     socket.on('begin', function() {
         console.log("doing everything else")
-        doEverythingElse(manualFeeds, 'manual');
+        if(manualFeeds.length && manualKeywords.length > 0) {
+          doEverythingElse(manualFeeds, 'manual');
+        }
     })
     socket.on('removeKeyword', function() {
       if(manualKeywords.length > 0) {
@@ -108,6 +124,12 @@ io.on('connection', function(socket) {
       if(manualFeeds.length > 0) {
         manualFeeds.pop();
       }
+    })
+    socket.on('clear', function() {
+      manualFeeds = [];
+      console.log("Feeds list cleared");
+      manualKeywords = [];
+      console.log("Keywords list cleared");
     })
 });
 
@@ -160,22 +182,51 @@ function formatResults(resultsDictionary, inputType, detectedKeywords) {
     var value = resultsDictionary.value;
     value = removeDupes(value);
     console.log("value after: " + value);
+    var groupedResults = []; //Array to be sent?
+    var groupLinks = []; //Array to be filled with
 
     if (inputType === 'auto') {
         //Fill auto array
 
         for (let i = 0; i < value.length; i++) {
-            autoHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords'] + "\n<br>\n");
+//            autoHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords']);// + "\n<br>\n");
+            autoHtmlArray.push(value[i]);
+        }
+
+        //prototype
+        //For every keyword,
+        for(let i = 0; i < keywords.length; i++) {
+          //This should write the headers
+          io.emit('formatAutoResults', keywords[i]);
+          //Check the entire array
+          for(let j = 0; j < autoHtmlArray.length; j++) {
+            //If at position j the current keyword is detected,
+            if(autoHtmlArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
+              console.log(autoHtmlArray[j]['postKeywords'] + ' match ' + keywords[i]);
+              io.emit('autoArray', autoHtmlArray[j]);
+            }
+          }
         }
 
     } else if (inputType === 'manual') {
         //Fill manual array
 
         for (let i = 0; i < value.length; i++) {
-            manualHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords'] + "\n<br>\n");
+            manualHtmlArray.push(value[i]);
         }
-        console.log("Manual html array: ")
-        console.log(manualHtmlArray);
+        //For every keyword,
+        for(let i = 0; i < manualKeywords.length; i++) {
+          //This should write the headers
+          io.emit('formatManualResults', manualKeywords[i]);
+          //Check the entire array
+          for(let j = 0; j < manualHtmlArray.length; j++) {
+            //If at position j the current keyword is detected,
+            if(manualHtmlArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
+              console.log(manualHtmlArray[j]['postKeywords'] + ' match ' + keywords[i]);
+              io.emit('manualArray', manualHtmlArray[j]);
+            }
+          }
+        }
     } else {
         console.log('INPUT TYPE must be MANUAL or AUTO: ' + inputType);
     }
@@ -186,8 +237,6 @@ function formatResults(resultsDictionary, inputType, detectedKeywords) {
 
 //FileContents/1st parameter is an array of feeds or URLs as strings
 //inputType/2nd param is a string that can either be manual or auto
-//if auto, follow same pipeline and send results to /results/auto
-//if manual, follow same pipeline but send results to /results/manual
 function doEverythingElse(fileContents, inputType) {
     console.log("DO EVERYTHING ELSE")
     var feedparser = new FeedParser();
@@ -263,7 +312,6 @@ function doEverythingElse(fileContents, inputType) {
                   detectedKeywords.push(keyArray[i]);
                   console.log("KEYWORD " + keyArray[i]);
                     console.log("SAVED LINK title: " + chunk['title']);
-                    io.emit('message', "SAVED LINK title: " + chunk['title'] + "\n")
                 }
             }
             if(detectedKeywords.length > 0) {

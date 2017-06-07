@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="css/style.css"></link>
 
 <head>
-    <title>ArticleHunter</title>
+    <title>Article Hunter</title>
 </head>
 
 <body>
@@ -26,7 +26,14 @@
         }
 
         function begin() {
-          socket.emit('begin')
+          document.getElementById("manualResultsScroll").innerHTML = "";
+          socket.emit('begin');
+        }
+
+        function clear() {
+          socket.emit('clear');
+          document.getElementById("feedsScrollList").innerHTML = "";
+          document.getElementById("keywordsScrollList").innerHTML = "";
         }
 
         function appendKeywordsList() {
@@ -50,7 +57,7 @@
             if (xmlhttp.readyState==4 && xmlhttp.status==200) {
               var ul = document.getElementById("feedsScrollList");
               var li = document.createElement("li");
-              console.log(xmlhttp.responseText);
+              //console.log(xmlhttp.responseText);
               li.appendChild(document.createTextNode(xmlhttp.responseText));
               ul.appendChild(li);
             }
@@ -68,12 +75,60 @@
           ul.removeChild();
         }
 
-        socket.on('message', function(data) {
-          var nav = document.getElementById("consoleScroll");
-          var label = document.createElement("label");
+        socket.on('autoArray', function(data) {
+          // console.log("autoArray");
+          // console.log(data['postTitle']);
+          var nav = document.getElementById("autoResultsScroll");
+          //label.appendChild(document.createTextNode(data));
+          var a = document.createElement('a');
+
+          var linkText = document.createTextNode(data['postTitle']);
+          var br = document.createElement("br");
+          a.appendChild(linkText);
+          a.href = data['postLink'];
+
+          nav.appendChild(a);
+          nav.appendChild(br);
+        });
+
+
+        socket.on("manualArray", function(data){
+          var nav = document.getElementById("manualResultsScroll");
+          var a = document.createElement('a');
+
+          var linkText = document.createTextNode(data['postTitle']);
+          var br = document.createElement("br");
+          a.appendChild(linkText);
+          a.href = data['postLink'];
+
+          nav.appendChild(a);
+          nav.appendChild(br);
+        });
+
+        socket.on('formatAutoResults', function(data) {
+          console.log("formatAutoResults: ");
           console.log(data);
-          label.appendChild(document.createTextNode(data));
-          nav.appendChild(label);
+          var text = document.createTextNode(data);
+          var h2 = document.createElement('h2');
+          var br = document.createElement("br");
+          var nav = document.getElementById("autoResultsScroll");
+
+          h2.appendChild(text);
+          nav.appendChild(h2);
+          nav.appendChild(br);
+        });
+
+        socket.on('formatManualResults', function(data) {
+          console.log("formatManualResults: ");
+          console.log(data);
+          var text = document.createTextNode(data);
+          var h2 = document.createElement('h2');
+          var br = document.createElement("br");
+          var nav = document.getElementById("manualResultsScroll");
+
+          h2.appendChild(text);
+          nav.appendChild(h2);
+          nav.appendChild(br);
         });
 
         function removeKeyword() {
@@ -127,8 +182,26 @@
   </div>
   <br>
   </form>
+
+    <form>
+      <input type="button" id="submitButton" value="Submit" onclick="begin()">
+      <input type="button" id="clearButton" value="Clear" onclick="clear()">
+    </form>
   </div>
 
+
+</div>
+
+<div class="row">
+  <div class="rssForm">
+    <nav id="manualResultsScroll">
+    </nav>
+  </div>
+
+  <div class="rssForm">
+    <nav id="autoResultsScroll">
+    </nav>
+  </div>
 </div>
 
 <!--
