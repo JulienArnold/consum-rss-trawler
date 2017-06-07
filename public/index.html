@@ -30,11 +30,16 @@
           socket.emit('begin');
         }
 
-        function clear() {
-          socket.emit('clear');
-          document.getElementById("feedsScrollList").innerHTML = "";
-          document.getElementById("keywordsScrollList").innerHTML = "";
-        }
+        // function clear() {
+        //   socket.emit('clear');
+        //   var feedList = document.getElementById("feedsScrollList");
+        //   var keywordList = document.getElementById("keywordsScrollList");
+        //
+        //   while(feedList.hasChildNodes() || keywordList.hasChildNodes()) {
+        //     feedList.removeChild(feedList.lastChild);
+        //     keywordList.removeChild(keywordList.lastChild);
+        //   }
+        // }
 
         function appendKeywordsList() {
           xmlhttp = new XMLHttpRequest();
@@ -67,12 +72,16 @@
 
         function removeFeedsElement() {
           var ul = document.getElementById("feedsScrollList");
-          ul.removeChild();
+          if(ul.hasChildNodes()) {
+            ul.removeChild(ul.lastChild);
+          }
         }
 
         function removeKeywordsElement() {
           var ul = document.getElementById("keywordsScrollList");
-          ul.removeChild();
+          if(ul.hasChildNodes()) {
+            ul.removeChild(ul.lastChild);
+          }
         }
 
         socket.on('autoArray', function(data) {
@@ -156,7 +165,7 @@
     <form id="inputFeedsForm" class="rssForm">
         <h1>Feeds</h1><br>
         <input type="text" id="feedsBox">
-        <input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList()">
+        <input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList();">
         <input type="button" id="feedsRemove" value="Remove" onclick="removeFeed(); removeFeedsElement();"><br><br><br>
         <div class="rssForm">
           <nav id="feedsScroll">
@@ -174,7 +183,7 @@
   <form id="inputKeywordsForm" class="rssForm">
     <h1>Additional Keywords</h1><br>
     <input type="text" id="keywordsBox">
-    <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList()">
+    <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
     <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();"><br><br><br>
     <div class="rssForm">
     <nav id="keywordsScroll">
@@ -187,7 +196,7 @@
 
     <form>
       <input type="button" id="submitButton" value="Submit" onclick="begin()">
-      <input type="button" id="clearButton" value="Clear" onclick="clear()">
+      <!-- <input type="button" id="clearButton" value="Clear" onclick="clear()"> -->
     </form>
   </div>
 
@@ -197,11 +206,13 @@
 <div class="row">
   <div class="rssForm">
     <nav id="manualResultsScroll">
+      <h1>Manual</h1>
     </nav>
   </div>
 
   <div class="rssForm">
     <nav id="autoResultsScroll">
+      <h1>Automatic</h1>
     </nav>
   </div>
 </div>
