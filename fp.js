@@ -44,16 +44,6 @@ app.get('/results/auto', function(req, res) {
       }
     }
   }
-
-/**    if (autoHtmlArray.length > 0) {
-        for (let i = 0; i < autoHtmlArray.length; i++) {
-            res.write(autoHtmlArray[i]);
-        }
-        res.send();
-    } else {
-        res.write("No results found!");
-        res.send();
-    } **/
     res.send();
 })
 
@@ -220,9 +210,10 @@ function formatResults(resultsDictionary, inputType, detectedKeywords) {
           io.emit('formatManualResults', manualKeywords[i]);
           //Check the entire array
           for(let j = 0; j < manualHtmlArray.length; j++) {
-            //If at position j the current keyword is detected,
-            if(manualHtmlArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
-              console.log(manualHtmlArray[j]['postKeywords'] + ' match ' + keywords[i]);
+            //If at position j the current keyword is detected in the postKeywords array,
+            if(manualHtmlArray[j]['postKeywords'].indexOf(manualKeywords[i]) > -1) {
+              //Log what we found and emit the object at j to index.html
+              console.log(manualHtmlArray[j]['postKeywords'] + ' match ' + manualKeywords[i]);
               io.emit('manualArray', manualHtmlArray[j]);
             }
           }
