@@ -92,10 +92,12 @@
           var a = document.createElement('a');
 
           var linkText = document.createTextNode(data['postTitle']);
+          var linkAuthor = document.createTextNode(data['postAuthor'] + ": ");
           var br = document.createElement("br");
           a.appendChild(linkText);
           a.href = data['postLink'];
 
+          nav.appendChild(linkAuthor);
           nav.appendChild(a);
           nav.appendChild(br);
         });
