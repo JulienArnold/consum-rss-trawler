@@ -12,12 +12,13 @@ var host = 'localhost';
 //io to send data back/forth using socket
 
 io = require('socket.io')(server);
-var keywords = ['Java', 'node', 'Node.js', 'memory', 'crashes'];
+var keywords = [];
 var resultsDict = {}; // create an empty array
-var autoHtmlArray = [];
-var manualHtmlArray = [];
-var manualFeeds = [];
-var manualKeywords = [];
+var feeds = [];
+var resultsArray = [];
+var processFile = true;
+
+
 //Because this uses express, you have to tell it to use the public directory
 //If that's where your files are
 app.use(express.static(__dirname + '/public'));
@@ -30,41 +31,11 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });
 
-app.get('/results/auto', function(req, res) {
-  console.log(autoHtmlArray);
-  console.log(autoHtmlArray.length);
-  //For every keyword in keywords, write the keyword as a h1/h2 to the page
-  //For the length of autoHtmlArray,
-  //If indexOf autoHtmlArray[i] contains the keyword, write it under this keyword h1
-  for(let i = 0; i < keywords.length; i++) {
-    res.write("<h2>" + keywords[i] + ":</h2><br>")
-    for(let j = 0; j < autoHtmlArray.length; j++) {
-      if(autoHtmlArray[j].indexOf(keywords[i]) > -1) {
-        res.write(autoHtmlArray[j] + "<br>");
-      }
-    }
-  }
-    res.send();
-})
-
-app.get('/results/manual', function(req, res) {
-    if (manualHtmlArray.length > 0) {
-        for (let i = 0; i < manualHtmlArray.length; i++) {
-            res.write(manualHtmlArray[i]);
-        }
-        res.send();
-    } else {
-        res.write("No results found!");
-        res.send();
-    }
-    io.send("array",manualHtmlArray)
-  })
-
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')
 app.get('/getkeywords', function(req, res) {
     console.log("request received")
-    var string = manualKeywords[manualKeywords.length - 1];
+    var string = keywords[keywords.length - 1];
     console.log("string '" + string + "' chosen");
     res.writeHead(200, {
         "Content-Type": "text/plain"
@@ -75,7 +46,7 @@ app.get('/getkeywords', function(req, res) {
 
 app.get('/getfeeds', function(req, res) {
     console.log("request received")
-    var string = manualFeeds[manualFeeds.length - 1];
+    var string = feeds[feeds.length - 1];
     console.log("string '" + string + "' chosen");
     res.writeHead(200, {
         "Content-Type": "text/plain"
@@ -90,50 +61,38 @@ io.on('connection', function(socket) {
     socket.on('feed', function(data) {
         console.log("SUCCESS");
         console.log(data.feedParams);
-        manualFeeds.push(data.feedParams);
+        feeds.push(data.feedParams);
     })
     socket.on('keyword', function(data) {
         console.log("SUCCESS");
         console.log(data.keywordParams);
-        manualKeywords.push(data.keywordParams);
-        console.log("Keywords: " + manualKeywords);
+        keywords.push(data.keywordParams);
+        console.log("Keywords: " + keywords);
     })
     socket.on('begin', function() {
         console.log("doing everything else")
-        if(manualFeeds.length && manualKeywords.length > 0) {
-          doEverythingElse(manualFeeds, 'manual');
+        if (feeds.length && keywords.length > 0) {
+            doEverythingElse(feeds);
         }
     })
     socket.on('removeKeyword', function() {
-      if(manualKeywords.length > 0) {
-        manualKeywords.pop();
-      }
+        if (keywords.length > 0) {
+            keywords.pop();
+        }
     })
 
     socket.on('removeFeed', function() {
-      if(manualFeeds.length > 0) {
-        manualFeeds.pop();
-      }
+        if (feeds.length > 0) {
+            feeds.pop();
+        }
     })
     socket.on('clear', function() {
-      manualFeeds = [];
-      console.log("Feeds list cleared");
-      manualKeywords = [];
-      console.log("Keywords list cleared");
+        feeds = [];
+        console.log("Feeds list cleared");
+        keywords = [];
+        console.log("Keywords list cleared");
     })
 });
-
-function arrUnique(arr) {
-    var cleaned = [];
-    arr.forEach(function(itm) {
-        var unique = true;
-        cleaned.forEach(function(itm2) {
-            if (_.isEqual(itm, itm2)) unique = false;
-        });
-        if (unique) cleaned.push(itm);
-    });
-    return cleaned;
-}
 
 function getFileContents() {
     //Only put 1 .feed and .keyword file pair under public/data/ . Multiple files will just break this
@@ -144,8 +103,7 @@ function getFileContents() {
     console.log("FILE CONTENTS: ")
     console.log(fileContents);
     // console.log("FILENAME": + filename);
-    autoHtmlArray = [];
-    doEverythingElse(fileContents, 'auto');
+    doEverythingElse(fileContents);
 }
 
 function removeDupes(arr) {
@@ -165,62 +123,42 @@ function removeDupes(arr) {
     return out;
 }
 
-function formatResults(resultsDictionary, inputType, detectedKeywords) {
+function formatResults(resultsDictionary) {
     //After the dictionary comes in, we just want the value array of objects
-    console.log("input type: " + inputType);
-    io.emit('message', inputType);
     var value = resultsDictionary.value;
     value = removeDupes(value);
-    console.log("value after: " + value);
     var groupedResults = []; //Array to be sent?
     var groupLinks = []; //Array to be filled with
 
-    if (inputType === 'auto') {
-        //Fill auto array
-
-        for (let i = 0; i < value.length; i++) {
-//            autoHtmlArray.push("<a href=" + value[i]['postLink'] + ">" + value[i]['postTitle'] + "</a> " + value[i]['postKeywords']);// + "\n<br>\n");
-            autoHtmlArray.push(value[i]);
-        }
-
-        //prototype
-        //For every keyword,
-        for(let i = 0; i < keywords.length; i++) {
-          //This should write the headers
-          io.emit('formatAutoResults', keywords[i]);
-          //Check the entire array
-          for(let j = 0; j < autoHtmlArray.length; j++) {
-            //If at position j the current keyword is detected,
-            if(autoHtmlArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
-              console.log(autoHtmlArray[j]['postKeywords'] + ' match ' + keywords[i]);
-              io.emit('autoArray', autoHtmlArray[j]);
-            }
-          }
-        }
-
-    } else if (inputType === 'manual') {
-        //Fill manual array
-
-        for (let i = 0; i < value.length; i++) {
-            manualHtmlArray.push(value[i]);
-        }
-        //For every keyword,
-        for(let i = 0; i < manualKeywords.length; i++) {
-          //This should write the headers
-          io.emit('formatManualResults', manualKeywords[i]);
-          //Check the entire array
-          for(let j = 0; j < manualHtmlArray.length; j++) {
-            //If at position j the current keyword is detected in the postKeywords array,
-            if(manualHtmlArray[j]['postKeywords'].indexOf(manualKeywords[i]) > -1) {
-              //Log what we found and emit the object at j to index.html
-              console.log(manualHtmlArray[j]['postKeywords'] + ' match ' + manualKeywords[i]);
-              io.emit('manualArray', manualHtmlArray[j]);
-            }
-          }
-        }
-    } else {
-        console.log('INPUT TYPE must be MANUAL or AUTO: ' + inputType);
+    for (let i = 0; i < value.length; i++) {
+        resultsArray.push(value[i]);
     }
+
+    //prototype
+    //For every keyword,
+    for (let i = 0; i < keywords.length; i++) {
+        //This should write the headers
+        if (processFile == true) {
+            io.emit('formatAutoResults', keywords[i]);
+        } else {
+            io.emit('formatManualResults', keywords[i]);
+        }
+        //Check the entire array
+        for (let j = 0; j < resultsArray.length; j++) {
+            //If at position j the current keyword is detected,
+            if (resultsArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
+                if (processFile == true) {
+                    io.emit('autoArray', resultsArray[j]);
+                } else {
+                    io.emit('manualArray', resultsArray[j]);
+                }
+
+            }
+        }
+    }
+    //Automatic run is done; set to manual, empty keywords array
+    processFile = false;
+    keywords = [];
     //By the end of this if statement we should have, after being called once for auto and once for manual input,
     //Two arrays. A manualHtml array which'll get passed into the manual results page
 
@@ -228,25 +166,18 @@ function formatResults(resultsDictionary, inputType, detectedKeywords) {
 
 //FileContents/1st parameter is an array of feeds or URLs as strings
 //inputType/2nd param is a string that can either be manual or auto
-function doEverythingElse(fileContents, inputType) {
-    console.log("DO EVERYTHING ELSE")
+function doEverythingElse(feedList) {
     var feedparser = new FeedParser();
     var savedLinks = [];
-    var numberOfFeeds = fileContents.length;
-    console.log("number of feeds at loop: " + numberOfFeeds)
-    var keyArray = [];
+    var numberOfFeeds = feedList.length;
     var detectedKeywords = [];
     //This differentiates whether to use manually input keywords, or a default set for auto
-    if (inputType === 'manual') {
-        keyArray = manualKeywords;
-    } else {
-        keyArray = keywords;
+    if (processFile == true) {
+        keywords = ['Java', 'node', 'Node.js', 'memory', 'crashes'];
     }
 
-    for (var i = 0; i < fileContents.length; i++) {
-        console.log("I " + i)
-        let currentFeed = fileContents[i];
-        console.log("CURRENT FEED: " + currentFeed);
+    for (var i = 0; i < feedList.length; i++) {
+        let currentFeed = feedList[i];
         var req = request(currentFeed);
 
 
@@ -271,9 +202,7 @@ function doEverythingElse(fileContents, inputType) {
 
         /* 4pm 23rd may - added this with the attempt to loop or iterate through multiple feeds*/
         feedparser.on('end', function() {
-            console.log("end called")
             numberOfFeeds--;
-            console.log("number of feeds after decrement " + numberOfFeeds);
             io.emit('message', "number of feeds after decrement " + numberOfFeeds + "\n");
             if (numberOfFeeds === 0) {
                 //let key = currentFeed.toString(); //String: URL of current feed
@@ -285,43 +214,42 @@ function doEverythingElse(fileContents, inputType) {
                 };
                 console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
                 io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
-                formatResults(resultsDict, inputType);
+                formatResults(resultsDict);
             }
         });
 
         feedparser.on('data', function(chunk) {
-          //Whenever we're looking at a new link, reset detectedKeywords to []
-          detectedKeywords = [];
+            //Whenever we're looking at a new link, reset detectedKeywords to []
+            detectedKeywords = [];
             //console.log("length before " + savedLinks.length);
             //console.log(JSON.stringify(chunk))
             //Store description of a given article, converting JSON to string
             var desc = JSON.stringify(chunk['description']);
             //for every keyword we have
-            for (let i = 0; i < keyArray.length; i++) {
-              //If the keyword is detected in the description:
-                if (desc.indexOf(keyArray[i]) > -1) {
-                  detectedKeywords.push(keyArray[i]);
-                  console.log("KEYWORD " + keyArray[i]);
-                    console.log("SAVED LINK title: " + chunk['title']);
+            for (let i = 0; i < keywords.length; i++) {
+                //If the keyword is detected in the description:
+                if (desc.indexOf(keywords[i]) > -1) {
+                    detectedKeywords.push(keywords[i]);
                 }
             }
-            if(detectedKeywords.length > 0) {
+            if (detectedKeywords.length > 0) {
                 savedLinks.push({
                     postLink: chunk['link'],
                     postTitle: chunk['title'],
+                    postAuthor: chunk['author'],
                     postKeywords: detectedKeywords
                 });
             }
             //console.log("length after " + savedLinks.length);
         });
 
-    } //end of for loop
-    console.log("DISPLAYING RESULTS");
-} //End of doing everything else
+    } //end of process loop
+} //End of 'doing everything else'
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
 getFileContents();
 //run getFileContents on a cron-like schedule of 9am
 scheduler.scheduleJob('* 9 * * *', function() {
-  getFileContents();
+    processFile = true;
+    getFileContents();
 })
