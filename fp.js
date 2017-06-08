@@ -72,7 +72,7 @@ io.on('connection', function(socket) {
     socket.on('begin', function() {
         console.log("doing everything else")
         if (feeds.length && keywords.length > 0) {
-            doEverythingElse(feeds);
+            processFeeds(feeds);
         }
     })
     socket.on('removeKeyword', function() {
@@ -103,7 +103,7 @@ function getFileContents() {
     console.log("FILE CONTENTS: ")
     console.log(fileContents);
     // console.log("FILENAME": + filename);
-    doEverythingElse(fileContents);
+    processFeeds(fileContents);
 }
 
 function removeDupes(arr) {
@@ -166,7 +166,7 @@ function formatResults(resultsDictionary) {
 
 //FileContents/1st parameter is an array of feeds or URLs as strings
 //inputType/2nd param is a string that can either be manual or auto
-function doEverythingElse(feedList) {
+function processFeeds(feedList) {
     var feedparser = new FeedParser();
     var savedLinks = [];
     var numberOfFeeds = feedList.length;
@@ -233,6 +233,7 @@ function doEverythingElse(feedList) {
                 }
             }
             if (detectedKeywords.length > 0) {
+
                 savedLinks.push({
                     postLink: chunk['link'],
                     postTitle: chunk['title'],

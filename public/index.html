@@ -121,28 +121,27 @@
         socket.on('formatAutoResults', function(data) {
           console.log("formatAutoResults: ");
           console.log(data);
-          var text = document.createTextNode(data);
-          var h2 = document.createElement('h2');
-          var br = document.createElement("br");
-          var nav = document.getElementById("autoResultsScroll");
-
-          h2.appendChild(text);
-          nav.appendChild(h2);
-          nav.appendChild(br);
+          formatting(data, "auto");
         });
 
         socket.on('formatManualResults', function(data) {
           console.log("formatManualResults: ");
           console.log(data);
+          formatting(data, "manual");
+        });
+
+        function formatting(data, objName) {
+          var scroll = objName + "ResultsScroll";
+          console.log(scroll);
           var text = document.createTextNode(data);
           var h2 = document.createElement('h2');
           var br = document.createElement("br");
-          var nav = document.getElementById("manualResultsScroll");
+          var nav = document.getElementById(scroll);
 
           h2.appendChild(text);
           nav.appendChild(h2);
           nav.appendChild(br);
-        });
+        }
 
         function removeKeyword() {
           socket.emit('removeKeyword');
@@ -202,7 +201,6 @@
     </form>
   </div>
 
-
 </div>
 
 <div class="row">
@@ -215,6 +213,12 @@
   <div class="rssForm">
     <nav id="autoResultsScroll">
       <h1>Automatic</h1>
+    </nav>
+  </div>
+
+  <div class="trendsForm">
+    <nav id="autoResultsScroll">
+      <h1>Trends</h1>
     </nav>
   </div>
 </div>
