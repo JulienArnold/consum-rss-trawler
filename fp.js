@@ -5,8 +5,14 @@ var request = require('request'); // for fetching the feed
 var fs = require('fs');
 var express = require('express');
 var scheduler = require('node-schedule');
+var MongoClient = require('mongodb').MongoClient;
+var mongoose = require('mongoose');
+// var Author = require('./author.js').Author;
+// var Site = require('./site.js').Site;
+// var Post = require('./post.js').Post;
+
 //Express server
-var app = express()
+var app = express();
 var server = require('http').Server(app);
 var host = 'localhost';
 //io to send data back/forth using socket
@@ -17,6 +23,9 @@ var resultsDict = {}; // create an empty array
 var feeds = [];
 var resultsArray = [];
 var processFile = true;
+var authorArray = [];
+
+
 
 
 //Because this uses express, you have to tell it to use the public directory
@@ -93,6 +102,19 @@ io.on('connection', function(socket) {
         console.log("Keywords list cleared");
     })
 });
+
+// Connect to the db
+// mongoose.connect("mongodb://localhost:27017/trendsDb");
+//
+// var db = mongoose.connection;
+// //Error handling
+// db.on('error', console.error.bind(console, 'connection error'));
+//
+// db.once('open', function() {
+//   var a = new Author();
+//   a.save();
+// });
+
 
 function getFileContents() {
     //Only put 1 .feed and .keyword file pair under public/data/ . Multiple files will just break this
@@ -204,6 +226,68 @@ function processFeeds(feedList) {
         feedparser.on('end', function() {
             numberOfFeeds--;
             io.emit('message', "number of feeds after decrement " + numberOfFeeds + "\n");
+
+            //START LOGIC---
+            for (let i = 0; i < savedLinks.length; i++) {
+                var found = false;
+
+                //For every saved link, look over the entire array of authors for a match
+                console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
+                for (let j = 0; j < authorArray.length; j++) {
+                  var siteFound = false;
+                    if (authorArray[j].name === savedLinks[i]['postAuthor']) {
+                        console.log("AUTHOR FOUND: " + authorArray[j].name);
+                        found = true;
+
+                        if (authorArray[j].sites.length > 0) {
+                            console.log("SITES IS NOT EMPTY FOR THIS AUTHOR");
+
+                            for (let k = 0; k < authorArray[j].sites.length; k++) {
+
+                                if (authorArray[j].sites[k]['url'].indexOf(currentFeed) > -1) {
+                                    console.log("URL FOUND")
+                                        //url found, increment post count for site object k
+                                    siteFound = true;
+                                    authorArray[j].sites[k]['postCount']++;
+                                }
+                            }
+
+                            if (!siteFound) {
+                                //url is NOT found and must therefore be new; add url
+                                var siteData = {
+                                    url: currentFeed,
+                                    postCount: 0
+                                };
+                                authorArray[j].sites.push(siteData);
+                            }
+                        } else {
+                            console.log("SITES IS EMPTY FOR THIS AUTHOR");
+                            console.log(authorArray[j]);
+                            //sites is not empty; check whether the current feed is in this author's sites
+
+                            //sites is empty; add site data
+                            var siteData = {
+                                url: currentFeed,
+                                postCount: 0
+                            };
+                            authorArray[j].sites.push(siteData);
+                            //For an author[j], iterate over this author's array of sites k
+
+                        }
+                    }
+                }
+                if (!found) {
+                  console.log("AUTHOR NOT FOUND");
+                  var tempAuthor = {
+                    name: savedLinks[i]['postAuthor'],
+                    sites: [{url: currentFeed, postCount: 0}]
+                  };
+                  authorArray.push(tempAuthor);
+                  console.log("ADDED AUTHOR: " + tempAuthor.name);
+                }
+
+            } //END LOGIC--
+
             if (numberOfFeeds === 0) {
                 //let key = currentFeed.toString(); //String: URL of current feed
                 //let value = savedLinks; //Array: Array: String URLs, String titles
@@ -213,16 +297,19 @@ function processFeeds(feedList) {
                     value: savedLinks //Array: Array: String URLs, String titles
                 };
                 console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
+
+
+
                 io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
                 formatResults(resultsDict);
+                console.log("AUTHOR ARRAY: " + JSON.stringify(authorArray));
+                io.emit('authorArray', authorArray);
             }
         });
 
         feedparser.on('data', function(chunk) {
             //Whenever we're looking at a new link, reset detectedKeywords to []
             detectedKeywords = [];
-            //console.log("length before " + savedLinks.length);
-            //console.log(JSON.stringify(chunk))
             //Store description of a given article, converting JSON to string
             var desc = JSON.stringify(chunk['description']);
             //for every keyword we have
@@ -231,9 +318,10 @@ function processFeeds(feedList) {
                 if (desc.indexOf(keywords[i]) > -1) {
                     detectedKeywords.push(keywords[i]);
                 }
+
+
             }
             if (detectedKeywords.length > 0) {
-
                 savedLinks.push({
                     postLink: chunk['link'],
                     postTitle: chunk['title'],
@@ -241,14 +329,14 @@ function processFeeds(feedList) {
                     postKeywords: detectedKeywords
                 });
             }
-            //console.log("length after " + savedLinks.length);
+
         });
 
     } //end of process loop
-} //End of 'doing everything else'
+} //End of processFeeds(feedList)
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
-getFileContents();
+  getFileContents();
 //run getFileContents on a cron-like schedule of 9am
 scheduler.scheduleJob('* 9 * * *', function() {
     processFile = true;

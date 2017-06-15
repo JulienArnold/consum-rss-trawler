@@ -110,17 +110,43 @@
           var a = document.createElement('a');
 
           var linkText = document.createTextNode(data['postTitle']);
+          var linkAuthor = document.createTextNode(data['postAuthor'] + ": ");
           var br = document.createElement("br");
           a.appendChild(linkText);
           a.href = data['postLink'];
 
+          nav.appendChild(linkAuthor);
           nav.appendChild(a);
           nav.appendChild(br);
         });
 
-        socket.on('formatAutoResults', function(data) {
-          console.log("formatAutoResults: ");
+        socket.on('authorArray', function(data) {
+          console.log('authorArray: ');
           console.log(data);
+          var nav = document.getElementById("trendsResultsScroll");
+          var br = document.createElement("br");
+          //var a = document.createElement('a');
+
+          for(let i = 0; i < data.length; i++) {
+            console.log(data[i]['sites'][0]['url']);
+            var nameText = document.createTextNode(data[i]['name'] + ": ");
+            var ul = document.createElement("ul");
+            nav.appendChild(nameText);
+            nav.appendChild(ul);
+            for(let j = 0; j < data[i]['sites'].length; j++) {
+              var a = document.createElement('a');
+              var linkText = document.createTextNode(data[i]['sites'][j]['url']);
+              a.appendChild(linkText);
+              ul.appendChild(a);
+              ul.appendChild(br);
+            }
+            nav.appendChild(br);
+          }
+        })
+
+        socket.on('formatAutoResults', function(data) {
+          //console.log("formatAutoResults: ");
+          //console.log(data);
           formatting(data, "auto");
         });
 
@@ -130,9 +156,10 @@
           formatting(data, "manual");
         });
 
+
         function formatting(data, objName) {
           var scroll = objName + "ResultsScroll";
-          console.log(scroll);
+          //console.log(scroll);
           var text = document.createTextNode(data);
           var h2 = document.createElement('h2');
           var br = document.createElement("br");
@@ -217,7 +244,7 @@
   </div>
 
   <div class="trendsForm">
-    <nav id="autoResultsScroll">
+    <nav id="trendsResultsScroll">
       <h1>Trends</h1>
     </nav>
   </div>
