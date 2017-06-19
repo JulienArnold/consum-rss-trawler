@@ -232,55 +232,48 @@ function processFeeds(feedList) {
                 var found = false;
 
                 //For every saved link, look over the entire array of authors for a match
-                console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
+                //console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
                 for (let j = 0; j < authorArray.length; j++) {
                   var siteFound = false;
+                  //If at any point during iteration we find a match...
                     if (authorArray[j].name === savedLinks[i]['postAuthor']) {
-                        console.log("AUTHOR FOUND: " + authorArray[j].name);
+                        //we have found an author
                         found = true;
 
+                        //null/length check for this author's sites array
                         if (authorArray[j].sites.length > 0) {
-                            console.log("SITES IS NOT EMPTY FOR THIS AUTHOR");
-
+                            //console.log("SITES IS NOT EMPTY FOR THIS AUTHOR");
+                            //Sites array is not empty, so iterate over every site object for this author
                             for (let k = 0; k < authorArray[j].sites.length; k++) {
 
-                                if (authorArray[j].sites[k]['url'].indexOf(currentFeed) > -1) {
-                                    console.log("URL FOUND")
-                                        //url found, increment post count for site object k
+                                //if the current site object's url matches the current feed,
+                                if (currentFeed.indexOf(authorArray[j].sites[k]['url']) > -1) {
+                                    console.log(currentFeed + " URL MATCH " + authorArray[j].sites[k]['url']);
+                                    //url found, increment post count for site object k
                                     siteFound = true;
                                     authorArray[j].sites[k]['postCount']++;
                                 }
-                            }
-
-                            if (!siteFound) {
-                                //url is NOT found and must therefore be new; add url
-                                var siteData = {
-                                    url: currentFeed,
-                                    postCount: 0
-                                };
-                                authorArray[j].sites.push(siteData);
-                            }
+                            } //Finish iterating sites object for author j
+                            //Return to iterating over
                         } else {
-                            console.log("SITES IS EMPTY FOR THIS AUTHOR");
-                            console.log(authorArray[j]);
-                            //sites is not empty; check whether the current feed is in this author's sites
-
+                            //console.log("SITES IS EMPTY FOR THIS AUTHOR");
                             //sites is empty; add site data
+
                             var siteData = {
-                                url: currentFeed,
+                                url: savedLinks[i]['postSource'],
                                 postCount: 0
                             };
                             authorArray[j].sites.push(siteData);
-                            //For an author[j], iterate over this author's array of sites k
-
                         }
+
+
                     }
                 }
                 if (!found) {
                   console.log("AUTHOR NOT FOUND");
                   var tempAuthor = {
                     name: savedLinks[i]['postAuthor'],
-                    sites: [{url: currentFeed, postCount: 0}]
+                    sites: []
                   };
                   authorArray.push(tempAuthor);
                   console.log("ADDED AUTHOR: " + tempAuthor.name);
@@ -326,6 +319,7 @@ function processFeeds(feedList) {
                     postLink: chunk['link'],
                     postTitle: chunk['title'],
                     postAuthor: chunk['author'],
+                    postSource: currentFeed.toString(),
                     postKeywords: detectedKeywords
                 });
             }
