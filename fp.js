@@ -70,7 +70,11 @@ io.on('connection', function(socket) {
     socket.on('feed', function(data) {
         console.log("SUCCESS");
         console.log(data.feedParams);
-        feeds.push(data.feedParams);
+        if(data.feedParams.indexOf("rss") > -1 || data.feedParams.indexOf("xml") > -1) {
+          feeds.push(data.feedParams);
+        } else {
+          console.log("Invalid feed: must be an RSS or XML url");
+        }
     })
     socket.on('keyword', function(data) {
         console.log("SUCCESS");
@@ -248,7 +252,7 @@ function processFeeds(feedList) {
 
                                 //if the current site object's url matches the current feed,
                                 if (currentFeed.indexOf(authorArray[j].sites[k]['url']) > -1) {
-                                    console.log(currentFeed + " URL MATCH " + authorArray[j].sites[k]['url']);
+                                    //console.log(currentFeed + " URL MATCH " + authorArray[j].sites[k]['url']);
                                     //url found, increment post count for site object k
                                     siteFound = true;
                                     authorArray[j].sites[k]['postCount']++;
@@ -295,7 +299,7 @@ function processFeeds(feedList) {
 
                 io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
                 formatResults(resultsDict);
-                console.log("AUTHOR ARRAY: " + JSON.stringify(authorArray));
+                //console.log("AUTHOR ARRAY: " + JSON.stringify(authorArray));
                 io.emit('authorArray', authorArray);
             }
         });
@@ -322,6 +326,7 @@ function processFeeds(feedList) {
                     postSource: currentFeed.toString(),
                     postKeywords: detectedKeywords
                 });
+                removeDupes(savedLinks);
             }
 
         });
@@ -332,7 +337,7 @@ function processFeeds(feedList) {
 //Run getFileContents() ONCE (on startup) just so we have a list of results
   getFileContents();
 //run getFileContents on a cron-like schedule of 9am
-scheduler.scheduleJob('* 9 * * *', function() {
+scheduler.scheduleJob('0 * * * * *', function() {
     processFile = true;
     getFileContents();
 })

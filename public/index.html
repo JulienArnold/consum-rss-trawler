@@ -42,6 +42,7 @@
         // }
 
         function appendKeywordsList() {
+          if(feedsBox.value != null) {
           xmlhttp = new XMLHttpRequest();
           xmlhttp.open("GET", window.location + "getkeywords", true);
           xmlhttp.onreadystatechange=function() {
@@ -53,9 +54,11 @@
             }
           }
           xmlhttp.send();
+          }
         }
 
         function appendFeedsList() {
+          if(feedsBox.value != null) {
           xmlhttp = new XMLHttpRequest();
           xmlhttp.open("GET", window.location + "getfeeds", true);
           xmlhttp.onreadystatechange=function() {
@@ -68,6 +71,7 @@
             }
           }
           xmlhttp.send();
+          }
         }
 
         function removeFeedsElement() {
@@ -85,8 +89,8 @@
         }
 
         socket.on('autoArray', function(data) {
+          document.getElementById("autoResultsScroll").innerHTML = "";
           // console.log("autoArray");
-          // console.log(data['postTitle']);
           var nav = document.getElementById("autoResultsScroll");
           //label.appendChild(document.createTextNode(data));
           var a = document.createElement('a');
@@ -121,6 +125,7 @@
         });
 
         socket.on('authorArray', function(data) {
+          document.getElementById("trendsResultsScroll").innerHTML = "";
           console.log('authorArray: ');
           console.log(data);
           var nav = document.getElementById("trendsResultsScroll");
@@ -249,20 +254,20 @@
 
 <div class="row">
   <div class="rssForm">
+    <h1>Manual</h1>
     <nav id="manualResultsScroll">
-      <h1>Manual</h1>
     </nav>
   </div>
 
   <div class="rssForm">
+    <h1>Automatic</h1>
     <nav id="autoResultsScroll">
-      <h1>Automatic</h1>
     </nav>
   </div>
 
   <div class="trendsForm">
+    <h1>Trends</h1>
     <nav id="trendsResultsScroll">
-      <h1>Trends</h1>
     </nav>
   </div>
 </div>
