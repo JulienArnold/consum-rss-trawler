@@ -42,7 +42,7 @@
         // }
 
         function appendKeywordsList() {
-          if(feedsBox.value != null) {
+          if(keywordsBox.value.length > 0) {
           xmlhttp = new XMLHttpRequest();
           xmlhttp.open("GET", window.location + "getkeywords", true);
           xmlhttp.onreadystatechange=function() {
@@ -54,11 +54,13 @@
             }
           }
           xmlhttp.send();
-          }
+        } else {
+          alert("Keyword cannot be blank");
+        }
         }
 
         function appendFeedsList() {
-          if(feedsBox.value != null) {
+          if(feedsBox.value.indexOf("rss") > -1 || feedsBox.value.indexOf("xml") > -1) {
           xmlhttp = new XMLHttpRequest();
           xmlhttp.open("GET", window.location + "getfeeds", true);
           xmlhttp.onreadystatechange=function() {
@@ -71,7 +73,9 @@
             }
           }
           xmlhttp.send();
-          }
+        } else {
+          alert("URL must link to an RSS or XML feed");
+        }
         }
 
         function removeFeedsElement() {
@@ -88,8 +92,12 @@
           }
         }
 
-        socket.on('autoArray', function(data) {
+        socket.on('clearAuto', function() {
           document.getElementById("autoResultsScroll").innerHTML = "";
+        })
+
+        socket.on('autoArray', function(data) {
+          //document.getElementById("autoResultsScroll").innerHTML = "";
           // console.log("autoArray");
           var nav = document.getElementById("autoResultsScroll");
           //label.appendChild(document.createTextNode(data));
@@ -271,26 +279,6 @@
     </nav>
   </div>
 </div>
-
-<!--
-<div class="bottomRow">
-  <div id="loggingDiv" class="col-1">
-    <h2>Logging</h2>
-    <nav id="consoleScroll">
-      <label></label>
-    </nav>
-  </div>
-
-  <div id="redirectDiv" class="col-2">
-    <h2>Results (Manual)</h2>
-    <a class="resultsLink" href="/results/manual">Manual Results Page</a>
-  </div>
-
-  <div id="redirectDiv2" class="col-3">
-    <h2>Results (Auto)</h2>
-    <a class="resultsLink" href="/results/auto">Automated Results</a>
-  </div>
-</div> -->
 
 </body>
 

@@ -66,14 +66,15 @@ app.get('/getfeeds', function(req, res) {
 
 io.on('connection', function(socket) {
     console.log("Connection made");
+    getFileContents();
 
     socket.on('feed', function(data) {
-        console.log("SUCCESS");
-        console.log(data.feedParams);
         if(data.feedParams.indexOf("rss") > -1 || data.feedParams.indexOf("xml") > -1) {
+          console.log("SUCCESS");
           feeds.push(data.feedParams);
         } else {
           console.log("Invalid feed: must be an RSS or XML url");
+          console.log(data.feedParams);
         }
     })
     socket.on('keyword', function(data) {
@@ -106,18 +107,6 @@ io.on('connection', function(socket) {
         console.log("Keywords list cleared");
     })
 });
-
-// Connect to the db
-// mongoose.connect("mongodb://localhost:27017/trendsDb");
-//
-// var db = mongoose.connection;
-// //Error handling
-// db.on('error', console.error.bind(console, 'connection error'));
-//
-// db.once('open', function() {
-//   var a = new Author();
-//   a.save();
-// });
 
 
 function getFileContents() {
@@ -160,7 +149,7 @@ function formatResults(resultsDictionary) {
         resultsArray.push(value[i]);
     }
 
-    //prototype
+    io.emit('clearAuto');
     //For every keyword,
     for (let i = 0; i < keywords.length; i++) {
         //This should write the headers
@@ -335,9 +324,9 @@ function processFeeds(feedList) {
 } //End of processFeeds(feedList)
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
-  getFileContents();
+  //getFileContents();
 //run getFileContents on a cron-like schedule of 9am
-scheduler.scheduleJob('0 * * * * *', function() {
+scheduler.scheduleJob('* * 9 * *', function() {
     processFile = true;
     getFileContents();
 })
