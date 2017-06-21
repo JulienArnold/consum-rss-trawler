@@ -26,8 +26,6 @@ var processFile = true;
 var authorArray = [];
 
 
-
-
 //Because this uses express, you have to tell it to use the public directory
 //If that's where your files are
 app.use(express.static(__dirname + '/public'));
@@ -66,7 +64,6 @@ app.get('/getfeeds', function(req, res) {
 
 io.on('connection', function(socket) {
     console.log("Connection made");
-    getFileContents();
 
     socket.on('feed', function(data) {
         if(data.feedParams.indexOf("rss") > -1 || data.feedParams.indexOf("xml") > -1) {
@@ -107,7 +104,6 @@ io.on('connection', function(socket) {
         console.log("Keywords list cleared");
     })
 });
-
 
 function getFileContents() {
     //Only put 1 .feed and .keyword file pair under public/data/ . Multiple files will just break this
@@ -176,7 +172,6 @@ function formatResults(resultsDictionary) {
     keywords = [];
     //By the end of this if statement we should have, after being called once for auto and once for manual input,
     //Two arrays. A manualHtml array which'll get passed into the manual results page
-
 }
 
 //FileContents/1st parameter is an array of feeds or URLs as strings
@@ -195,7 +190,6 @@ function processFeeds(feedList) {
         let currentFeed = feedList[i];
         var req = request(currentFeed);
 
-
         req.on('error', function(error) {
             // handle any request errors
         });
@@ -203,7 +197,6 @@ function processFeeds(feedList) {
         req.on('response', function(res) {
             //console.log('response')
             var stream = this; // `this` is `req`, which is a stream
-
             if (res.statusCode !== 200) {
                 this.emit('error', new Error('Bad status code'));
             } else {
@@ -223,7 +216,6 @@ function processFeeds(feedList) {
             //START LOGIC---
             for (let i = 0; i < savedLinks.length; i++) {
                 var found = false;
-
                 //For every saved link, look over the entire array of authors for a match
                 //console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
                 for (let j = 0; j < authorArray.length; j++) {
@@ -232,13 +224,11 @@ function processFeeds(feedList) {
                     if (authorArray[j].name === savedLinks[i]['postAuthor']) {
                         //we have found an author
                         found = true;
-
                         //null/length check for this author's sites array
                         if (authorArray[j].sites.length > 0) {
                             //console.log("SITES IS NOT EMPTY FOR THIS AUTHOR");
                             //Sites array is not empty, so iterate over every site object for this author
                             for (let k = 0; k < authorArray[j].sites.length; k++) {
-
                                 //if the current site object's url matches the current feed,
                                 if (currentFeed.indexOf(authorArray[j].sites[k]['url']) > -1) {
                                     //console.log(currentFeed + " URL MATCH " + authorArray[j].sites[k]['url']);
@@ -258,8 +248,6 @@ function processFeeds(feedList) {
                             };
                             authorArray[j].sites.push(siteData);
                         }
-
-
                     }
                 }
                 if (!found) {
@@ -283,7 +271,6 @@ function processFeeds(feedList) {
                     value: savedLinks //Array: Array: String URLs, String titles
                 };
                 console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
-
 
 
                 io.emit('message', "FINAL FEED " + currentFeed.toString() + "\n" + " & SAVED LINKS: " + savedLinks.length + "\n");
@@ -324,7 +311,7 @@ function processFeeds(feedList) {
 } //End of processFeeds(feedList)
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
-  //getFileContents();
+  getFileContents();
 //run getFileContents on a cron-like schedule of 9am
 scheduler.scheduleJob('* * 9 * *', function() {
     processFile = true;

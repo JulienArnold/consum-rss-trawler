@@ -224,7 +224,8 @@
         <h1>Feeds</h1><br>
         <input type="text" id="feedsBox">
         <input type="button" id="feedsButton" value="Add" onclick="sendFeeds(); appendFeedsList();">
-        <input type="button" id="feedsRemove" value="Remove" onclick="removeFeed(); removeFeedsElement();"><br><br><br>
+        <input type="button" id="feedsRemove" value="Remove" onclick="removeFeed(); removeFeedsElement();">
+        <br><br><br>
         <div class="rssForm">
           <nav id="feedsScroll">
             <ul id="feedsScrollList">
@@ -234,15 +235,14 @@
         <br>
     </form>
   </div>
-</div>
 
-<div class="row" id="rightCol">
-  <div id="keywordFormDiv" class="col-1">
+  <div id="inputKeywordsDiv" class="col-2">
   <form id="inputKeywordsForm" class="rssForm">
-    <h1>Additional Keywords</h1><br>
+    <h1>Keywords</h1><br>
     <input type="text" id="keywordsBox">
     <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
-    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();"><br><br><br>
+    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();">
+    <br><br><br>
     <div class="rssForm">
     <nav id="keywordsScroll">
       <ul id="keywordsScrollList">
@@ -252,15 +252,17 @@
   <br>
   </form>
 
-    <form>
-      <input type="button" id="submitButton" value="Submit" onclick="begin()">
-      <!-- <input type="button" id="clearButton" value="Clear" onclick="clear()"> -->
-    </form>
   </div>
 
 </div>
 
-<div class="row">
+
+<div class="row" id="rightCol">
+  <form id="submitForm">
+    <input type="button" id="submitButton" value="Start" onclick="begin()">
+    <!-- <input type="button" id="clearButton" value="Clear" onclick="clear()"> -->
+  </form><br>
+
   <div class="rssForm">
     <h1>Manual</h1>
     <nav id="manualResultsScroll">
@@ -280,6 +282,9 @@
   </div>
 </div>
 
-</body>
 
+<div id="bottomRow" class="row"><br>
+
+</div>
+</body>
 </html>
