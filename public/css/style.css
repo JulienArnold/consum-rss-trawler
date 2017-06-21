@@ -64,6 +64,9 @@ a:hover {
   border-width: 3px;
   border-color: #deedf7;
   background-color: #6f7878;
+  clear: right;
+  height: 100px;
+  position: sticky;
 }
 
 .row {
@@ -73,7 +76,6 @@ a:hover {
   margin-left: -15px;
   margin-right: -15px;
 }
-
 
 .col-1,
 .col-2,
@@ -88,13 +90,30 @@ a:hover {
   text-align: center;
 }
 
+#leftCol {
+  float: left;
+  width: 50%;
+}
+
+#rightCol {
+  float: right;
+  width: 50%;
+}
+
 #inputFeedsForm {
   background-color: #1c496d;
   float: right;
 }
 
+#keywordsScroll,
+#feedsScroll  {
+  text-align: left;
+  word-wrap: break-word
+}
+
 #inputKeywordsForm {
   float: left;
+  width: 75%;
   background-color: #1c496d;
 }
 
@@ -109,19 +128,6 @@ a:hover {
   width: 80%;
 }
 
-
-#leftCol {
-  float: left;
-  width: 50%;
-}
-
-#rightCol {
-  float: right;
-  width: 50%;
-}
-
 #bottomRow {
-  clear: both;
-  height: 100px;
-  position: sticky;
+  clear: left;
 }

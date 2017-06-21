@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/style.css"></link>
+    <title>Article Hunter - Trends</title>
+  </head>
+
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        var myurl = location.host;
+        var socket = io.connect(myurl);
+        console.log("in business");
+
+        socket.on('authorArray', function(data) {
+          document.getElementById("trendsResultsScroll").innerHTML = "";
+          console.log('authorArray: ');
+          console.log(data);
+          var nav = document.getElementById("trendsResultsScroll");
+          var divCounter = 0;
+
+            for(let i = 0; i < data.length; i++) {
+              //Assign each author their own div
+              var containerName = "authorDiv" + (divCounter++);
+
+              //If this div exists already, empty the data to be updated on-page
+              if(nav.contains(document.getElementById(containerName))) {
+                $("#" + containerName).empty();
+                var authorDiv = document.getElementById(containerName);
+                
+              } else {
+                //Otherwise, create a div for the author
+                var authorDiv = document.createElement("div");
+                authorDiv.id = containerName;
+                console.log(authorDiv.id);
+                nav.append(authorDiv);
+              }
+
+              var nameText = document.createTextNode(data[i]['name'] + " ");
+              var ul = document.createElement("ul");
+              authorDiv.appendChild(nameText);
+              authorDiv.appendChild(ul);
+
+              for(let j = 0; j < data[i]['sites'].length; j++) {
+                var br = document.createElement("br");
+                var a = document.createElement('a');
+                var urlText = document.createTextNode(data[i]['sites'][j]['url']);
+                var urlPostCount = document.createTextNode(": " + data[i]['sites'][j]['postCount'] + " Posts");
+                a.appendChild(urlText);
+                ul.appendChild(a);
+                ul.appendChild(urlPostCount);
+                ul.appendChild(br);
+              }
+            }
+            nav.appendChild(br);
+        });
+
+</script>
+
+    <div class="headerDiv">
+        <span class="titleHeader">Article Hunter</span>
+        <span class="gitHeader">
+        <a href="/">Main Page</a>
+        </span>
+    </div>
+
+
+    <div class="trendsForm"><br>
+      <h1>Trends</h1>
+      <nav id="trendsResultsScroll">
+      </nav>
+    </div>
+  </body>
+</html>

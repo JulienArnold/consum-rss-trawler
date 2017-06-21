@@ -24,6 +24,7 @@ var feeds = [];
 var resultsArray = [];
 var processFile = true;
 var authorArray = [];
+//9.140.98.116:3000
 
 
 //Because this uses express, you have to tell it to use the public directory
@@ -37,6 +38,10 @@ server.listen(3000, '0.0.0.0', function() {
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });
+
+app.get('/trends', function(req, res) {
+    res.sendFile(__dirname + '/public/trends.html');
+})
 
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')
@@ -81,27 +86,24 @@ io.on('connection', function(socket) {
         console.log("Keywords: " + keywords);
     })
     socket.on('begin', function() {
-        console.log("doing everything else")
         if (feeds.length && keywords.length > 0) {
+          console.log("doing everything else")
             processFeeds(feeds);
+        } else {
+          socket.emit('noFeedsOrKeywords');
         }
     })
     socket.on('removeKeyword', function() {
+      console.log('removeKeyword:' + keywords);
         if (keywords.length > 0) {
             keywords.pop();
+            console.log(keywords);
         }
     })
-
     socket.on('removeFeed', function() {
         if (feeds.length > 0) {
             feeds.pop();
         }
-    })
-    socket.on('clear', function() {
-        feeds = [];
-        console.log("Feeds list cleared");
-        keywords = [];
-        console.log("Keywords list cleared");
     })
 });
 
