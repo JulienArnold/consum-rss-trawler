@@ -41,7 +41,11 @@ app.get('/', function(req, res) {
 
 app.get('/trends', function(req, res) {
     res.sendFile(__dirname + '/public/trends.html');
-})
+});
+
+app.get('/nightly', function(req, res) {
+    res.sendFile(__dirname + '/public/nightly.html');
+});
 
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')

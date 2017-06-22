@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style.css"></link>
+  <title>Article Hunter - Trends</title>
+</head>
+
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script>
+  var myurl = location.host;
+  var socket = io.connect(myurl);
+  console.log("in business");
+
+  socket.on('autoArray', function(data) {
+    //document.getElementById("autoResultsScroll").innerHTML = "";
+    // console.log("autoArray");
+    var nav = document.getElementById("autoResultsScroll");
+    //label.appendChild(document.createTextNode(data));
+    var a = document.createElement('a');
+
+    var linkText = document.createTextNode(data['postTitle']);
+    var linkAuthor = document.createTextNode(data['postAuthor'] + ": ");
+    var br = document.createElement("br");
+    a.appendChild(linkText);
+    a.href = data['postLink'];
+
+    nav.appendChild(linkAuthor);
+    nav.appendChild(a);
+    nav.appendChild(br);
+  });
+
+  socket.on('formatAutoResults', function(data) {
+    //console.log("formatAutoResults: ");
+    //console.log(data);
+    formatting(data, "auto");
+  });
+
+  socket.on('clearAuto', function() {
+    document.getElementById("autoResultsScroll").innerHTML = "";
+  })
+
+  function formatting(data, objName) {
+    var scroll = objName + "ResultsScroll";
+    //console.log(scroll);
+    var text = document.createTextNode(data);
+    var h2 = document.createElement('h2');
+    var br = document.createElement("br");
+    var nav = document.getElementById(scroll);
+
+    h2.appendChild(text);
+    nav.appendChild(h2);
+    nav.appendChild(br);
+  }
+  </script>
+
+  <div class="headerDiv">
+      <span class="titleHeader">Article Hunter</span>
+      <span class="gitHeader">
+      <a href="/">Main Page</a>
+      </span>
+  </div>
+
+<div id="rightCol" class="row">
+  <div class="rssForm">
+    <h1>Automatic</h1>
+    <nav id="autoResultsScroll">
+    </nav>
+  </div>
+</div>
+
+</body>
+</html>

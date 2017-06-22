@@ -77,10 +77,6 @@
         }
 
 
-        socket.on('clearAuto', function() {
-          document.getElementById("autoResultsScroll").innerHTML = "";
-        })
-
         socket.on('autoArray', function(data) {
           //document.getElementById("autoResultsScroll").innerHTML = "";
           // console.log("autoArray");
@@ -120,12 +116,6 @@
         socket.on('noFeedsOrKeywords', function() {
           alert("At least 1 RSS/XML feed and 1 keyword must be specified.");
         })
-
-        socket.on('formatAutoResults', function(data) {
-          //console.log("formatAutoResults: ");
-          //console.log(data);
-          formatting(data, "auto");
-        });
 
         socket.on('formatManualResults', function(data) {
           console.log("formatManualResults: ");
@@ -197,48 +187,55 @@
   </div>
 
   <div id="inputKeywordsDiv" class="col-2">
-  <form id="inputKeywordsForm" class="rssForm">
-    <h1>Keywords</h1><br>
-    <input type="text" id="keywordsBox">
-    <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
-    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();">
-    <br><br><br>
-    <div class="rssForm">
-    <nav id="keywordsScroll">
-      <ul id="keywordsScrollList">
-      </ul>
-    </nav>
+    <form id="inputKeywordsForm" class="rssForm">
+      <h1>Keywords</h1><br>
+      <input type="text" id="keywordsBox">
+      <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
+      <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();">
+      <br><br><br>
+        <div class="rssForm">
+          <nav id="keywordsScroll">
+            <ul id="keywordsScrollList">
+            </ul>
+          </nav>
+        </div>
+      <br>
+    </form>
   </div>
-  <br>
-  </form>
-</div>
 
 </div>
 
 
 <div class="row" id="rightCol">
+  <div id="instructionsDiv">
+    <h1>Tutorial</h1>
+    <p>
+      In the text box under 'Feeds', type or paste the URL of an RSS/XML feed. Multiple can be added, but one at a time.<br>
+      In the text box under 'Keywords', type or paste one (or several) keywords with which to search given articles/posts for.<br>
+      (Again, multiple keywords are supported, but please add only one at a time.<br>
+    </p>
+    <h2>Nightly</h2>
+    <p>
+      An automated, nightly set of results can be found <a href="/nightly">here</a>.<br>
+    </p>
+    <h2>Trending</h2>
+    <p>
+      Article Hunter also tracks and stores certain 'trending' data. This data is displayed <a href="/trends">here</a>.<br>
+    </p>
+  </div>
+
   <form id="submitForm">
     <input type="button" id="submitButton" value="Start" onclick="begin()">
     <!-- <input type="button" id="clearButton" value="Clear" onclick="clear()"> -->
   </form><br>
+</div>
 
+
+<div id="bottomRow" class="row"><br>
   <div class="rssForm">
     <h1>Manual</h1>
     <nav id="manualResultsScroll">
     </nav>
-  </div>
-
-  <div class="rssForm">
-    <h1>Automatic</h1>
-    <nav id="autoResultsScroll">
-    </nav>
-  </div>
-
-</div>
-
-<div id="bottomRow" class="row"><br>
-  <div class="trendsForm"><br>
-    <h1><a href="/trends">Trends</a></h1>
   </div>
 </div>
 
