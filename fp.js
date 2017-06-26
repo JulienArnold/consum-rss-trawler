@@ -52,7 +52,7 @@ app.get('/nightly', function(req, res) {
 app.get('/getkeywords', function(req, res) {
     console.log("request received")
     var string = keywords[keywords.length - 1];
-    console.log("string '" + string + "' chosen");
+    console.log("string '" + string + "' chosen from keywords[]");
     res.writeHead(200, {
         "Content-Type": "text/plain"
     });
@@ -61,9 +61,9 @@ app.get('/getkeywords', function(req, res) {
 })
 
 app.get('/getfeeds', function(req, res) {
-    console.log("request received")
+    console.log("request received");
     var string = feeds[feeds.length - 1];
-    console.log("string '" + string + "' chosen");
+    console.log("string '" + string + "' chosen from feeds[]");
     res.writeHead(200, {
         "Content-Type": "text/plain"
     });
@@ -75,13 +75,9 @@ io.on('connection', function(socket) {
     console.log("Connection made");
 
     socket.on('feed', function(data) {
-        if(data.feedParams.indexOf("rss") > -1 || data.feedParams.indexOf("xml") > -1) {
           console.log("SUCCESS");
           feeds.push(data.feedParams);
-        } else {
-          console.log("Invalid feed: must be an RSS or XML url");
-          console.log(data.feedParams);
-        }
+          console.log(feeds);
     })
     socket.on('keyword', function(data) {
         console.log("SUCCESS");
@@ -101,12 +97,14 @@ io.on('connection', function(socket) {
       console.log('removeKeyword:' + keywords);
         if (keywords.length > 0) {
             keywords.pop();
-            console.log(keywords);
+            console.log("After: " + keywords);
         }
     })
     socket.on('removeFeed', function() {
+      console.log("Before: " + feeds);
         if (feeds.length > 0) {
             feeds.pop();
+            console.log("After: " + feeds);
         }
     })
 });
@@ -117,9 +115,6 @@ function getFileContents() {
     // var filename = path.basename('./public/data/default.feed', '.feed');
     fileContents = fs.readFileSync("./public/data/default.feed").toString().split("\r\n");
     fileContents.pop();
-    console.log("FILE CONTENTS: ")
-    console.log(fileContents);
-    // console.log("FILENAME": + filename);
     processFeeds(fileContents);
 }
 
@@ -257,7 +252,7 @@ function processFeeds(feedList) {
                     }
                 }
                 if (!found) {
-                  console.log("AUTHOR NOT FOUND");
+                  //console.log("AUTHOR NOT FOUND");
                   var tempAuthor = {
                     name: savedLinks[i]['postAuthor'],
                     sites: []
@@ -317,9 +312,11 @@ function processFeeds(feedList) {
 } //End of processFeeds(feedList)
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
-  getFileContents();
+    getFileContents();
 //run getFileContents on a cron-like schedule of 9am
 scheduler.scheduleJob('* * 9 * *', function() {
+    var now = new Date();
+    io.emit('date', now);
     processFile = true;
     getFileContents();
 })

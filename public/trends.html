@@ -11,6 +11,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script>
+    window.onload = function() {
         var myurl = location.host;
         var socket = io.connect(myurl);
         console.log("in business");
@@ -30,7 +31,7 @@
               if(nav.contains(document.getElementById(containerName))) {
                 $("#" + containerName).empty();
                 var authorDiv = document.getElementById(containerName);
-                
+
               } else {
                 //Otherwise, create a div for the author
                 var authorDiv = document.createElement("div");
@@ -50,6 +51,7 @@
                 var urlText = document.createTextNode(data[i]['sites'][j]['url']);
                 var urlPostCount = document.createTextNode(": " + data[i]['sites'][j]['postCount'] + " Posts");
                 a.appendChild(urlText);
+                a.href = urlText;
                 ul.appendChild(a);
                 ul.appendChild(urlPostCount);
                 ul.appendChild(br);
@@ -57,7 +59,7 @@
             }
             nav.appendChild(br);
         });
-
+}
 </script>
 
     <div class="headerDiv">
