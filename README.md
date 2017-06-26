@@ -10,11 +10,11 @@ A small web application that accepts keywords and RSS feeds (as URLs) and parses
 4. A server will begin listening on `localhost:3000`, with more information on the home page/`index.html`.
 5. The app requires at least one keyword and feed to function. 
   
-  5.i. To add keywords and feeds to be parsed through, paste a URL directly to the feed you wish to be parsed in the "Feeds" textbox, and click the `Add` button alongside. This can be done multiple times.
+  5.i. To add keywords and feeds to be parsed through, paste a valid URL directly to the Atom/RSS/XML feed you wish to be parsed in the "Feeds" textbox, and click the `Add` button alongside. This can be done multiple times.
   
   5.ii. Repeat with the keywords textbox, adding one word at a time.
   
-6. When you are satisfied with what you wish to be parsed, click the `Submit` button. This will send the feeds and keywords as parameters to be used. Check the command line for more information while this is running.
+6. When you are satisfied with what you wish to be parsed, click the `Start` button. This will send the feeds and keywords as parameters to be used. Check the command line for more information while this is running.
 7. To view the results, navigate in your browser to `localhost:3000`.
   
  7.i. Automatic results are scheduled to run at 9am daily, and are updated/posted to `/nightly`. The home page provides a link.
