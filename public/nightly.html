@@ -38,6 +38,9 @@
 
   socket.on('clearAuto', function() {
     document.getElementById("autoResultsScroll").innerHTML = "";
+    var nav = document.getElementById("autoResultsScroll");
+    var dateText = document.createTextNode(new Date());
+    nav.appendChild(dateText);
   })
 
   function formatting(data, objName) {
@@ -54,6 +57,7 @@
   }
 
   socket.on('nightlyfeeds', function(data) {
+    document.getElementById("feedsScrollList").innerHTML = "";
       var ul = document.getElementById("feedsScrollList");
       console.log(data);
       for(let i = 0; i < data.length; i++) {

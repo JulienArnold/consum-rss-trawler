@@ -116,6 +116,9 @@
           document.getElementById("manualResultsScroll").innerHTML = "";
           //document.getElementById("feedsScrollList").innerHTML = "";
           document.getElementById("keywordsScrollList").innerHTML = "";
+          var nav = document.getElementById("manualResultsScroll");
+          var dateText = document.createTextNode(new Date());
+          nav.appendChild(dateText);
           socket.emit('begin');
         }
 
@@ -157,12 +160,6 @@
           console.log("formatManualResults: ");
           console.log(data);
           formatting(data, "manual");
-        });
-
-        $(document).ready(function() {
-          var nav = document.getElementById("manualResultsScroll");
-          var dateText = document.createTextNode(new Date());
-          nav.appendChild(dateText);
         });
 
         $(window).on('beforeunload', function(){
