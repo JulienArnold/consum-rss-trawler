@@ -111,18 +111,20 @@ p {
   border: 3px outset;
 }
 
+#instructionsDiv h1, h2 {
+
+}
+
 #inputFeedsForm {
   background-color: #1c496d;
   float: right;
 }
-
 
 #inputKeywordsForm {
   float: left;
   width: 75%;
   background-color: #1c496d;
 }
-
 
 #submitButton {
   position: relative;
@@ -136,8 +138,4 @@ p {
 
 #bottomRow {
   clear: left;
-}
-
-#instructionsDiv h1, h2 {
-
 }

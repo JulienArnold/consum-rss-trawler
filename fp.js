@@ -24,6 +24,7 @@ var feeds = [];
 var resultsArray = [];
 var processFile = true;
 var authorArray = [];
+var fileContents = [];
 //9.140.98.116:3000
 
 
@@ -50,18 +51,20 @@ app.get('/nightly', function(req, res) {
 //Try duplicating for feeds - will need to be done slightly different
 //As manualFeeds is defined within io.on('connection')
 app.get('/getkeywords', function(req, res) {
-    console.log("request received")
+    console.log("getkey keywords: " + keywords);
+    //len - 1 is for adding/removing latest item i.e. for manual
     var string = keywords[keywords.length - 1];
     console.log("string '" + string + "' chosen from keywords[]");
     res.writeHead(200, {
         "Content-Type": "text/plain"
     });
     res.end(string);
-    console.log("string sent");
 })
 
 app.get('/getfeeds', function(req, res) {
-    console.log("request received");
+    console.log("getfee feeds: " + fileContents);
+    console.log("Processfile@ " + processFile);
+    //len - 1 is for adding/removing latest item i.e. for manual
     var string = feeds[feeds.length - 1];
     console.log("string '" + string + "' chosen from feeds[]");
     res.writeHead(200, {
@@ -75,9 +78,9 @@ io.on('connection', function(socket) {
     console.log("Connection made");
 
     socket.on('feed', function(data) {
-          console.log("SUCCESS");
-          feeds.push(data.feedParams);
-          console.log(feeds);
+        console.log("SUCCESS");
+        feeds.push(data.feedParams);
+        console.log("Feeds: " + feeds);
     })
     socket.on('keyword', function(data) {
         console.log("SUCCESS");
@@ -87,21 +90,21 @@ io.on('connection', function(socket) {
     })
     socket.on('begin', function() {
         if (feeds.length && keywords.length > 0) {
-          console.log("doing everything else")
+            console.log("doing everything else")
             processFeeds(feeds);
         } else {
-          socket.emit('noFeedsOrKeywords');
+            socket.emit('noFeedsOrKeywords');
         }
     })
     socket.on('removeKeyword', function() {
-      console.log('removeKeyword:' + keywords);
+        console.log('removeKeyword:' + keywords);
         if (keywords.length > 0) {
             keywords.pop();
             console.log("After: " + keywords);
         }
     })
     socket.on('removeFeed', function() {
-      console.log("Before: " + feeds);
+        console.log("Before: " + feeds);
         if (feeds.length > 0) {
             feeds.pop();
             console.log("After: " + feeds);
@@ -111,7 +114,7 @@ io.on('connection', function(socket) {
 
 function getFileContents() {
     //Only put 1 .feed and .keyword file pair under public/data/ . Multiple files will just break this
-    var fileContents = [];
+    fileContents = [];
     // var filename = path.basename('./public/data/default.feed', '.feed');
     fileContents = fs.readFileSync("./public/data/default.feed").toString().split("\r\n");
     fileContents.pop();
@@ -145,8 +148,10 @@ function formatResults(resultsDictionary) {
     for (let i = 0; i < value.length; i++) {
         resultsArray.push(value[i]);
     }
-
-    io.emit('clearAuto');
+    if (processFile == true) {
+        io.emit('clearAuto');
+        io.emit('nightlyfeeds', fileContents);
+    }
     //For every keyword,
     for (let i = 0; i < keywords.length; i++) {
         //This should write the headers
@@ -170,7 +175,7 @@ function formatResults(resultsDictionary) {
     }
     //Automatic run is done; set to manual, empty keywords array
     processFile = false;
-    keywords = [];
+    //keywords = [];
     //By the end of this if statement we should have, after being called once for auto and once for manual input,
     //Two arrays. A manualHtml array which'll get passed into the manual results page
 }
@@ -220,8 +225,8 @@ function processFeeds(feedList) {
                 //For every saved link, look over the entire array of authors for a match
                 //console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
                 for (let j = 0; j < authorArray.length; j++) {
-                  var siteFound = false;
-                  //If at any point during iteration we find a match...
+                    var siteFound = false;
+                    //If at any point during iteration we find a match...
                     if (authorArray[j].name === savedLinks[i]['postAuthor']) {
                         //we have found an author
                         found = true;
@@ -252,13 +257,13 @@ function processFeeds(feedList) {
                     }
                 }
                 if (!found) {
-                  //console.log("AUTHOR NOT FOUND");
-                  var tempAuthor = {
-                    name: savedLinks[i]['postAuthor'],
-                    sites: []
-                  };
-                  authorArray.push(tempAuthor);
-                  console.log("ADDED AUTHOR: " + tempAuthor.name);
+                    //console.log("AUTHOR NOT FOUND");
+                    var tempAuthor = {
+                        name: savedLinks[i]['postAuthor'],
+                        sites: []
+                    };
+                    authorArray.push(tempAuthor);
+                    console.log("ADDED AUTHOR: " + tempAuthor.name);
                 }
 
             } //END LOGIC--
@@ -292,9 +297,8 @@ function processFeeds(feedList) {
                 if (desc.indexOf(keywords[i]) > -1) {
                     detectedKeywords.push(keywords[i]);
                 }
-
-
             }
+
             if (detectedKeywords.length > 0) {
                 savedLinks.push({
                     postLink: chunk['link'],
@@ -305,18 +309,14 @@ function processFeeds(feedList) {
                 });
                 removeDupes(savedLinks);
             }
-
         });
-
     } //end of process loop
 } //End of processFeeds(feedList)
 
 //Run getFileContents() ONCE (on startup) just so we have a list of results
-    getFileContents();
+getFileContents();
 //run getFileContents on a cron-like schedule of 9am
 scheduler.scheduleJob('* * 9 * *', function() {
-    var now = new Date();
-    io.emit('date', now);
     processFile = true;
     getFileContents();
 })

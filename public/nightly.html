@@ -33,8 +33,6 @@
   });
 
   socket.on('formatAutoResults', function(data) {
-    //console.log("formatAutoResults: ");
-    //console.log(data);
     formatting(data, "auto");
   });
 
@@ -54,6 +52,21 @@
     nav.appendChild(h2);
     nav.appendChild(br);
   }
+
+  socket.on('nightlyfeeds', function(data) {
+      var ul = document.getElementById("feedsScrollList");
+      console.log(data);
+      for(let i = 0; i < data.length; i++) {
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(data[i]));
+        ul.appendChild(li);
+      }
+  });
+
+  $(window).on('beforeunload', function(){
+    socket.close();
+  });
+
   </script>
 
   <div class="headerDiv">
@@ -61,6 +74,23 @@
       <span class="gitHeader">
       <a href="/">Main Page</a>
       </span>
+  </div>
+
+  <div class="row" id="leftCol">
+
+    <div id="inputFeedsDiv" class="col-1">
+      <form id="inputFeedsForm" class="rssForm">
+          <h1>Feeds</h1><br>
+          <div class="rssForm">
+            <nav id="feedsScroll">
+              <ul id="feedsScrollList">
+              </ul>
+            </nav>
+          </div>
+          <br>
+      </form>
+    </div>
+
   </div>
 
 <div id="rightCol" class="row">

@@ -66,6 +66,7 @@
             console.log(xhr.status);
           }
           xhr.send();
+          socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
         } else {
           alert("URL must link to an RSS/XML feed.")
         }
@@ -158,15 +159,15 @@
           formatting(data, "manual");
         });
 
-        socket.on('date', function(data) {
-          console.log(data);
-          var nav = document.getElementById("manualContainer");
-          var dateText = document.createTextNode(data);
+        $(document).ready(function() {
+          var nav = document.getElementById("manualResultsScroll");
+          var dateText = document.createTextNode(new Date());
           nav.appendChild(dateText);
         });
 
-        var now = new Date();
-        console.log(now);
+        $(window).on('beforeunload', function(){
+          socket.close();
+        });
 
     </script>
 
