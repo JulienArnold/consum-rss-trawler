@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
 
-<meta charset="utf-8">
-
-<link rel="stylesheet" href="css/style.css"></link>
-
-<head>
-    <title>Article Hunter</title>
-</head>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/style.css"></link>
+    <title>Article Hunter - Main Page</title>
+  </head>
 
 <body>
     <script src="/socket.io/socket.io.js"></script>
@@ -17,54 +15,30 @@
         var socket = io.connect(myurl);
         console.log("in business");
 
-        function sendFeeds() {
-          socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
-        }
-
-        function sendKeywords() {
-          socket.emit('keyword', {keywordParams: inputKeywordsForm.keywordsBox.value})
-        }
-
-        function begin() {
-          document.getElementById("manualResultsScroll").innerHTML = "";
-          socket.emit('begin');
-        }
-
-        // function clear() {
-        //   socket.emit('clear');
-        //   var feedList = document.getElementById("feedsScrollList");
-        //   var keywordList = document.getElementById("keywordsScrollList");
-        //
-        //   while(feedList.hasChildNodes() || keywordList.hasChildNodes()) {
-        //     feedList.removeChild(feedList.lastChild);
-        //     keywordList.removeChild(keywordList.lastChild);
-        //   }
-        // }
-
         function appendKeywordsList() {
           if(keywordsBox.value.length > 0) {
-          xmlhttp = new XMLHttpRequest();
-          xmlhttp.open("GET", window.location + "getkeywords", true);
-          xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-              var ul = document.getElementById("keywordsScrollList");
-              var li = document.createElement("li");
-              li.appendChild(document.createTextNode(xmlhttp.responseText));
-              ul.appendChild(li);
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", window.location + "getkeywords", true);
+            xmlhttp.onreadystatechange=function() {
+              if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                var ul = document.getElementById("keywordsScrollList");
+                var li = document.createElement("li");
+                li.appendChild(document.createTextNode(xmlhttp.responseText));
+                ul.appendChild(li);
+              }
             }
+            xmlhttp.send();
+          } else {
+            alert("Keyword cannot be blank");
           }
-          xmlhttp.send();
-        } else {
-          alert("Keyword cannot be blank");
-        }
         }
 
         function appendFeedsList() {
-          if(feedsBox.value.indexOf("rss") > -1 || feedsBox.value.indexOf("xml") > -1) {
-          xmlhttp = new XMLHttpRequest();
-          xmlhttp.open("GET", window.location + "getfeeds", true);
-          xmlhttp.onreadystatechange=function() {
-            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+          if(feedsBox.value.length > 0) {
+            xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", window.location + "getfeeds", true);
+            xmlhttp.onreadystatechange=function() {
+              if (xmlhttp.readyState==4 && xmlhttp.status==200) {
               var ul = document.getElementById("feedsScrollList");
               var li = document.createElement("li");
               //console.log(xmlhttp.responseText);
@@ -74,15 +48,57 @@
           }
           xmlhttp.send();
         } else {
-          alert("URL must link to an RSS or XML feed");
+            alert("Feed cannot be blank");
         }
+      }
+
+        function sendFeeds() {
+          console.log("sendFeeds");
+          var url = inputFeedsForm.feedsBox.value;
+          if(url.indexOf("rss") > -1 || url.indexOf("xml") > -1) {
+
+            // Tobes start
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', url, true);
+          console.log("xhr open");
+          xhr.onreadystatechange=function() {
+            console.log("onreadystatechange");
+            console.log(xhr.status);
+          }
+          xhr.send();
+          socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
+        } else {
+          alert("URL must link to an RSS/XML feed.")
         }
+
+          // if(window.XMLHttpRequest)
+          //   request = new XMLHttpRequest();
+          // request.open('GET', url, false);
+          // request.send(); // there will be a 'pause' here until the response to come.
+          //   // the object request will be actually modified
+          // if (request.status === 404) {
+          //   alert("The page you are trying to reach is not available.");
+          // } else if (request.status === 200) {
+          //   console.log("200 received");
+          //   socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
+          //   appendFeedsList();
+          // }
+        }
+
+        function sendKeywords() {
+          socket.emit('keyword', {keywordParams: inputKeywordsForm.keywordsBox.value})
+        }
+
 
         function removeFeedsElement() {
           var ul = document.getElementById("feedsScrollList");
           if(ul.hasChildNodes()) {
             ul.removeChild(ul.lastChild);
           }
+        }
+
+        function removeFeed() {
+          socket.emit('removeFeed');
         }
 
         function removeKeywordsElement() {
@@ -92,30 +108,31 @@
           }
         }
 
-        socket.on('clearAuto', function() {
-          document.getElementById("autoResultsScroll").innerHTML = "";
-        })
+        function removeKeyword() {
+          socket.emit('removeKeyword');
+        }
 
-        socket.on('autoArray', function(data) {
-          //document.getElementById("autoResultsScroll").innerHTML = "";
-          // console.log("autoArray");
-          var nav = document.getElementById("autoResultsScroll");
-          //label.appendChild(document.createTextNode(data));
-          var a = document.createElement('a');
+        function begin() {
+          document.getElementById("manualResultsScroll").innerHTML = "";
+          //document.getElementById("feedsScrollList").innerHTML = "";
+          document.getElementById("keywordsScrollList").innerHTML = "";
+          socket.emit('begin');
+        }
 
-          var linkText = document.createTextNode(data['postTitle']);
-          var linkAuthor = document.createTextNode(data['postAuthor'] + ": ");
+        function formatting(data, objName) {
+          var scroll = objName + "ResultsScroll";
+          //console.log(scroll);
+          var text = document.createTextNode(data);
+          var h2 = document.createElement('h2');
           var br = document.createElement("br");
-          a.appendChild(linkText);
-          a.href = data['postLink'];
+          var nav = document.getElementById(scroll);
 
-          nav.appendChild(linkAuthor);
-          nav.appendChild(a);
+          h2.appendChild(text);
+          nav.appendChild(h2);
           nav.appendChild(br);
-        });
+        }
 
-
-        socket.on("manualArray", function(data){
+        socket.on("manualArray", function(data) {
           console.log("manualArray");
           console.log(data);
           var nav = document.getElementById("manualResultsScroll");
@@ -132,53 +149,9 @@
           nav.appendChild(br);
         });
 
-        socket.on('authorArray', function(data) {
-          document.getElementById("trendsResultsScroll").innerHTML = "";
-          console.log('authorArray: ');
-          console.log(data);
-          var nav = document.getElementById("trendsResultsScroll");
-          var divCounter = 0;
-
-            for(let i = 0; i < data.length; i++) {
-              //Assign each author their own div
-              var containerName = "authorDiv" + (divCounter++);
-
-              //If this div exists already, empty the data to be updated on-page
-              if(nav.contains(document.getElementById(containerName))) {
-                $("#" + containerName).empty();
-                var authorDiv = document.getElementById(containerName);
-              } else {
-                //Otherwise, create a div for the author
-                var authorDiv = document.createElement("div");
-                authorDiv.id = containerName;
-                console.log(authorDiv.id);
-                nav.append(authorDiv);
-              }
-
-              var nameText = document.createTextNode(data[i]['name'] + " ");
-              var ul = document.createElement("ul");
-              authorDiv.appendChild(nameText);
-              authorDiv.appendChild(ul);
-
-              for(let j = 0; j < data[i]['sites'].length; j++) {
-                var br = document.createElement("br");
-                var a = document.createElement('a');
-                var urlText = document.createTextNode(data[i]['sites'][j]['url']);
-                var urlPostCount = document.createTextNode(": " + data[i]['sites'][j]['postCount'] + " Posts");
-                a.appendChild(urlText);
-                ul.appendChild(a);
-                ul.appendChild(urlPostCount);
-                ul.appendChild(br);
-              }
-            }
-            nav.appendChild(br);
+        socket.on('noFeedsOrKeywords', function() {
+          alert("At least 1 RSS/XML feed and 1 keyword must be specified.");
         })
-
-        socket.on('formatAutoResults', function(data) {
-          //console.log("formatAutoResults: ");
-          //console.log(data);
-          formatting(data, "auto");
-        });
 
         socket.on('formatManualResults', function(data) {
           console.log("formatManualResults: ");
@@ -186,27 +159,15 @@
           formatting(data, "manual");
         });
 
+        $(document).ready(function() {
+          var nav = document.getElementById("manualResultsScroll");
+          var dateText = document.createTextNode(new Date());
+          nav.appendChild(dateText);
+        });
 
-        function formatting(data, objName) {
-          var scroll = objName + "ResultsScroll";
-          //console.log(scroll);
-          var text = document.createTextNode(data);
-          var h2 = document.createElement('h2');
-          var br = document.createElement("br");
-          var nav = document.getElementById(scroll);
-
-          h2.appendChild(text);
-          nav.appendChild(h2);
-          nav.appendChild(br);
-        }
-
-        function removeKeyword() {
-          socket.emit('removeKeyword');
-        }
-
-        function removeFeed() {
-          socket.emit('removeFeed');
-        }
+        $(window).on('beforeunload', function(){
+          socket.close();
+        });
 
     </script>
 
@@ -237,54 +198,57 @@
   </div>
 
   <div id="inputKeywordsDiv" class="col-2">
-  <form id="inputKeywordsForm" class="rssForm">
-    <h1>Keywords</h1><br>
-    <input type="text" id="keywordsBox">
-    <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
-    <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();">
-    <br><br><br>
-    <div class="rssForm">
-    <nav id="keywordsScroll">
-      <ul id="keywordsScrollList">
-      </ul>
-    </nav>
-  </div>
-  <br>
-  </form>
-
+    <form id="inputKeywordsForm" class="rssForm">
+      <h1>Keywords</h1><br>
+      <input type="text" id="keywordsBox">
+      <input type="button" id="keywordsButton" value="Add" onclick="sendKeywords(); appendKeywordsList();">
+      <input type="button" id="keywordsRemove" value="Remove" onclick="removeKeyword(); removeKeywordsElement();">
+      <br><br><br>
+        <div class="rssForm">
+          <nav id="keywordsScroll">
+            <ul id="keywordsScrollList">
+            </ul>
+          </nav>
+        </div>
+      <br>
+    </form>
   </div>
 
 </div>
 
 
 <div class="row" id="rightCol">
+  <div id="instructionsDiv">
+    <h1>Tutorial</h1>
+    <p>
+      In the text box under 'Feeds', type or paste the URL of an RSS/XML feed. Multiple can be added, but one at a time.<br>
+      In the text box under 'Keywords', type or paste one (or several) keywords with which to search given articles/posts for.<br>
+      (Again, multiple keywords are supported, but please add only one at a time.<br>
+    </p>
+    <h2>Nightly</h2>
+    <p>
+      An automated, nightly set of results can be found <a href="/nightly">here</a>.<br>
+    </p>
+    <h2>Trending</h2>
+    <p>
+      Article Hunter also tracks and stores certain 'trending' data. This data is displayed <a href="/trends">here</a>.<br>
+    </p>
+  </div>
+
   <form id="submitForm">
     <input type="button" id="submitButton" value="Start" onclick="begin()">
     <!-- <input type="button" id="clearButton" value="Clear" onclick="clear()"> -->
   </form><br>
-
-  <div class="rssForm">
-    <h1>Manual</h1>
-    <nav id="manualResultsScroll">
-    </nav>
-  </div>
-
-  <div class="rssForm">
-    <h1>Automatic</h1>
-    <nav id="autoResultsScroll">
-    </nav>
-  </div>
-
-  <div class="trendsForm">
-    <h1>Trends</h1>
-    <nav id="trendsResultsScroll">
-    </nav>
-  </div>
 </div>
 
 
 <div id="bottomRow" class="row"><br>
-
+  <div id="manualContainer" class="rssForm">
+    <h1>Manual</h1>
+    <nav id="manualResultsScroll">
+    </nav>
+  </div>
 </div>
+
 </body>
 </html>

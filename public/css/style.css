@@ -29,7 +29,8 @@ a {
      color: #e7e9f7;
    }
 
-a:hover {
+a:hover,
+p {
      color: #d9dcf2;
    }
 
@@ -64,6 +65,9 @@ a:hover {
   border-width: 3px;
   border-color: #deedf7;
   background-color: #6f7878;
+  clear: right;
+  height: 100px;
+  position: sticky;
 }
 
 .row {
@@ -73,7 +77,6 @@ a:hover {
   margin-left: -15px;
   margin-right: -15px;
 }
-
 
 .col-1,
 .col-2,
@@ -88,28 +91,6 @@ a:hover {
   text-align: center;
 }
 
-#inputFeedsForm {
-  background-color: #1c496d;
-  float: right;
-}
-
-#inputKeywordsForm {
-  float: left;
-  background-color: #1c496d;
-}
-
-
-#submitButton {
-  position: relative;
-}
-
-#submitForm {
-  border: 1px outset;
-  margin: 0 auto;
-  width: 80%;
-}
-
-
 #leftCol {
   float: left;
   width: 50%;
@@ -120,8 +101,41 @@ a:hover {
   width: 50%;
 }
 
+#keywordsScroll,
+#feedsScroll  {
+  text-align: left;
+  word-wrap: break-word
+}
+
+#instructionsDiv {
+  border: 3px outset;
+}
+
+#instructionsDiv h1, h2 {
+
+}
+
+#inputFeedsForm {
+  background-color: #1c496d;
+  float: right;
+}
+
+#inputKeywordsForm {
+  float: left;
+  width: 75%;
+  background-color: #1c496d;
+}
+
+#submitButton {
+  position: relative;
+  border: 3px outset;
+}
+
+#submitForm {
+  margin: 0 auto;
+  width: 80%;
+}
+
 #bottomRow {
-  clear: both;
-  height: 100px;
-  position: sticky;
+  clear: left;
 }
