@@ -17,76 +17,48 @@
 
         function appendKeywordsList() {
           if(keywordsBox.value.length > 0) {
-            xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("GET", window.location + "getkeywords", true);
-            xmlhttp.onreadystatechange=function() {
-              if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                var ul = document.getElementById("keywordsScrollList");
-                var li = document.createElement("li");
-                li.appendChild(document.createTextNode(xmlhttp.responseText));
-                ul.appendChild(li);
-              }
-            }
-            xmlhttp.send();
+            socket.emit('GetLastKeyword');
           } else {
             alert("Keyword cannot be blank");
           }
-        }
+      }
 
-        function appendFeedsList() {
-          if(feedsBox.value.length > 0) {
-            xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("GET", window.location + "getfeeds", true);
-            xmlhttp.onreadystatechange=function() {
-              if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-              var ul = document.getElementById("feedsScrollList");
-              var li = document.createElement("li");
-              //console.log(xmlhttp.responseText);
-              li.appendChild(document.createTextNode(xmlhttp.responseText));
-              ul.appendChild(li);
-            }
-          }
-          xmlhttp.send();
-        } else {
-            alert("Feed cannot be blank");
+      socket.on('GetLastKeyword', function(data) {
+        console.log('got last keyword');
+        console.log(data);
+        var ul = document.getElementById("keywordsScrollList");
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(data));
+        ul.appendChild(li);
+      })
+
+      function appendFeedsList() {
+        if(inputFeedsForm.feedsBox.value !== null) {
+          socket.emit('GetLastFeed');
         }
       }
+
+      socket.on("TOBESfeeds", function(data) {
+        console.log("TOBESfeeds");
+        console.log(data);
+        var ul = document.getElementById("feedsScrollList");
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(data));
+        ul.appendChild(li);
+      });
 
         function sendFeeds() {
           console.log("sendFeeds");
           var url = inputFeedsForm.feedsBox.value;
-          if(url.indexOf("rss") > -1 || url.indexOf("xml") > -1) {
-
-            // Tobes start
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', url, true);
-          console.log("xhr open");
-          xhr.onreadystatechange=function() {
-            console.log("onreadystatechange");
-            console.log(xhr.status);
-          }
-          xhr.send();
-          socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
-        } else {
-          alert("URL must link to an RSS/XML feed.")
-        }
-
-          // if(window.XMLHttpRequest)
-          //   request = new XMLHttpRequest();
-          // request.open('GET', url, false);
-          // request.send(); // there will be a 'pause' here until the response to come.
-          //   // the object request will be actually modified
-          // if (request.status === 404) {
-          //   alert("The page you are trying to reach is not available.");
-          // } else if (request.status === 200) {
-          //   console.log("200 received");
-          //   socket.emit('feed', {feedParams: inputFeedsForm.feedsBox.value});
-          //   appendFeedsList();
-          // }
+          if((url.indexOf("rss") > -1 || url.indexOf("xml") > -1)) {
+              socket.emit('AddFeed', {feedParams: inputFeedsForm.feedsBox.value});
+            } else {
+              alert("URL must link to an RSS/XML feed.")
+            }
         }
 
         function sendKeywords() {
-          socket.emit('keyword', {keywordParams: inputKeywordsForm.keywordsBox.value})
+          socket.emit('AddKeyword', {keywordParams: inputKeywordsForm.keywordsBox.value})
         }
 
 
@@ -98,7 +70,7 @@
         }
 
         function removeFeed() {
-          socket.emit('removeFeed');
+          socket.emit('RemoveFeed');
         }
 
         function removeKeywordsElement() {
@@ -109,7 +81,7 @@
         }
 
         function removeKeyword() {
-          socket.emit('removeKeyword');
+          socket.emit('RemoveKeyword');
         }
 
         function begin() {

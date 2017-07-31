@@ -5,11 +5,7 @@ var request = require('request'); // for fetching the feed
 var fs = require('fs');
 var express = require('express');
 var scheduler = require('node-schedule');
-var MongoClient = require('mongodb').MongoClient;
-var mongoose = require('mongoose');
-// var Author = require('./author.js').Author;
-// var Site = require('./site.js').Site;
-// var Post = require('./post.js').Post;
+var path = require('path');
 
 //Express server
 var app = express();
@@ -25,19 +21,25 @@ var resultsArray = [];
 var processFile = true;
 var authorArray = [];
 var fileContents = [];
+var nightlyArray = [];
 //9.140.98.116:3000
 
-
+var directory = path.resolve(__dirname, '..', '/public');
+var site = express.static(__dirname + '/public');
+var server;
 //Because this uses express, you have to tell it to use the public directory
 //If that's where your files are
-app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '/public'));
+ app.use('/', site);
 
 server.listen(3000, '0.0.0.0', function() {
     console.log('Example app listening on port 3000!')
 })
 
 app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/public/index.html');
+  //var directory = path.resolve(__dirname, '..', 'public/');
+  //var site = express.static(directory);
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('/trends', function(req, res) {
@@ -45,7 +47,13 @@ app.get('/trends', function(req, res) {
 });
 
 app.get('/nightly', function(req, res) {
-    res.sendFile(__dirname + '/public/nightly.html');
+  res.sendFile(__dirname + '/public/nightly.html');
+    console.log("nightly called");
+    for (let j = 0; j < nightlyArray.length; j++) {
+      console.log(nightlyArray[j]);
+        //If at position j the current keyword is detected,
+        io.emit('autoArray', nightlyArray[j]);
+    }
 });
 
 //Try duplicating for feeds - will need to be done slightly different
@@ -61,28 +69,36 @@ app.get('/getkeywords', function(req, res) {
     res.end(string);
 })
 
-app.get('/getfeeds', function(req, res) {
-    console.log("getfee feeds: " + fileContents);
-    console.log("Processfile@ " + processFile);
-    //len - 1 is for adding/removing latest item i.e. for manual
-    var string = feeds[feeds.length - 1];
-    console.log("string '" + string + "' chosen from feeds[]");
-    res.writeHead(200, {
-        "Content-Type": "text/plain"
-    });
-    res.end(string);
-    console.log("string sent");
-})
+
 
 io.on('connection', function(socket) {
     console.log("Connection made");
 
-    socket.on('feed', function(data) {
+    socket.on('GetLastFeed', function() {
+        console.log("GetLastFeed: " + feeds);
+        //len - 1 is for adding/removing latest item i.e. for manual
+        if(feeds.length > 0) {
+          var string = feeds[feeds.length - 1];
+          console.log("string '" + string + "' chosen from feeds[]");
+          socket.emit('TOBESfeeds', string);
+          console.log("string sent");
+        }
+    });
+
+    socket.on('GetLastKeyword', function() {
+      console.log("GetLastKeywords");
+
+      var string = keywords[keywords.length - 1];
+      console.log("string '" + string + "' chosen from keywords[]'");
+      socket.emit('gotkeywords', string);
+    })
+
+    socket.on('AddFeed', function(data) {
         console.log("SUCCESS");
         feeds.push(data.feedParams);
         console.log("Feeds: " + feeds);
-    })
-    socket.on('keyword', function(data) {
+    });
+    socket.on('AddKeyword', function(data) {
         console.log("SUCCESS");
         console.log(data.keywordParams);
         keywords.push(data.keywordParams);
@@ -96,14 +112,14 @@ io.on('connection', function(socket) {
             socket.emit('noFeedsOrKeywords');
         }
     })
-    socket.on('removeKeyword', function() {
+    socket.on('RemoveKeyword', function() {
         console.log('removeKeyword:' + keywords);
         if (keywords.length > 0) {
             keywords.pop();
             console.log("After: " + keywords);
         }
     })
-    socket.on('removeFeed', function() {
+    socket.on('RemoveFeed', function() {
         console.log("Before: " + feeds);
         if (feeds.length > 0) {
             feeds.pop();
@@ -161,12 +177,15 @@ function formatResults(resultsDictionary) {
             io.emit('formatManualResults', keywords[i]);
         }
         //Check the entire array
+
+
         for (let j = 0; j < resultsArray.length; j++) {
             //If at position j the current keyword is detected,
-            if (resultsArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
-                if (processFile == true) {
-                    io.emit('autoArray', resultsArray[j]);
-                } else {
+
+            if (processFile == true) {
+              nightlyArray[j] = resultsArray[j];
+            } else {
+              if (resultsArray[j]['postKeywords'].indexOf(keywords[i]) > -1) {
                     io.emit('manualArray', resultsArray[j]);
                 }
 
@@ -316,7 +335,7 @@ function processFeeds(feedList) {
 //Run getFileContents() ONCE (on startup) just so we have a list of results
 getFileContents();
 //run getFileContents on a cron-like schedule of 9am
-scheduler.scheduleJob('* * 9 * *', function() {
+scheduler.scheduleJob('0 * * * *', function() {
     processFile = true;
     getFileContents();
 })
