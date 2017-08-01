@@ -208,7 +208,9 @@ function processFeeds(feedList) {
     var detectedKeywords = [];
     //This differentiates whether to use manually input keywords, or a default set for auto
     if (processFile == true) {
-        keywords = ['Java', 'node', 'Node.js', 'memory', 'crashes'];
+        keywords = [];
+        keywords = fs.readFileSync("./public/data/default.keywords").toString().split("\r\n");
+        keywords.pop();
     }
 
     for (var i = 0; i < feedList.length; i++) {
@@ -239,23 +241,30 @@ function processFeeds(feedList) {
             io.emit('message', "number of feeds after decrement " + numberOfFeeds + "\n");
 
             //START LOGIC---
+            //Remember Linus Torvalds - you don't need more than 3 indentations
+            //For every saved link, look over the entire array of authors for a match
             for (let i = 0; i < savedLinks.length; i++) {
-                var found = false;
-                //For every saved link, look over the entire array of authors for a match
+
+                let found = false;
                 //console.log("SEARCHING FOR AUTHOR: " + savedLinks[i]['postAuthor']);
                 for (let j = 0; j < authorArray.length; j++) {
-                    var siteFound = false;
+
+                    let siteFound = false;
                     //If at any point during iteration we find a match...
                     if (authorArray[j].name === savedLinks[i]['postAuthor']) {
+
                         //we have found an author
                         found = true;
                         //null/length check for this author's sites array
                         if (authorArray[j].sites.length > 0) {
+
                             //console.log("SITES IS NOT EMPTY FOR THIS AUTHOR");
                             //Sites array is not empty, so iterate over every site object for this author
                             for (let k = 0; k < authorArray[j].sites.length; k++) {
+
                                 //if the current site object's url matches the current feed,
                                 if (currentFeed.indexOf(authorArray[j].sites[k]['url']) > -1) {
+
                                     //console.log(currentFeed + " URL MATCH " + authorArray[j].sites[k]['url']);
                                     //url found, increment post count for site object k
                                     siteFound = true;
@@ -267,17 +276,18 @@ function processFeeds(feedList) {
                             //console.log("SITES IS EMPTY FOR THIS AUTHOR");
                             //sites is empty; add site data
 
-                            var siteData = {
+                            let siteData = {
                                 url: savedLinks[i]['postSource'],
                                 postCount: 0
                             };
                             authorArray[j].sites.push(siteData);
                         }
+
                     }
                 }
                 if (!found) {
                     //console.log("AUTHOR NOT FOUND");
-                    var tempAuthor = {
+                    let tempAuthor = {
                         name: savedLinks[i]['postAuthor'],
                         sites: []
                     };
@@ -287,13 +297,13 @@ function processFeeds(feedList) {
 
             } //END LOGIC--
 
-            if (numberOfFeeds === 0) {
+              if (numberOfFeeds === 0) {
                 //let key = currentFeed.toString(); //String: URL of current feed
                 //let value = savedLinks; //Array: Array: String URLs, String titles
                 //resultsDict[key] = value;
                 resultsDict = {
-                    key: currentFeed.toString(), //String: URL of current feed
-                    value: savedLinks //Array: Array: String URLs, String titles
+                  key: currentFeed.toString(), //String: URL of current feed
+                  value: savedLinks //Array: Array: String URLs, String titles
                 };
                 console.log("FINAL FEED " + currentFeed.toString() + " & SAVED LINKS: " + savedLinks.length);
 
@@ -302,7 +312,8 @@ function processFeeds(feedList) {
                 formatResults(resultsDict);
                 //console.log("AUTHOR ARRAY: " + JSON.stringify(authorArray));
                 io.emit('authorArray', authorArray);
-            }
+              }
+
         });
 
         feedparser.on('data', function(chunk) {
